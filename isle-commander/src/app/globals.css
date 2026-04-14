@@ -1,0 +1,138 @@
+/* ── Google Fonts (must be first) ── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+@import "tailwindcss";
+
+/* ── Tailwind v4 Theme (CSS-first config) ── */
+@theme {
+  /* ── Nautical Color Palette ── */
+  --color-primary: #00656f;
+  --color-primary-dim: #005861;
+  --color-on-primary: #d4f9ff;
+  --color-primary-container: #59eafb;
+  --color-on-primary-container: #00535b;
+  --color-primary-fixed: #59eafb;
+  --color-primary-fixed-dim: #46dced;
+  --color-on-primary-fixed: #003f45;
+  --color-on-primary-fixed-variant: #005e66;
+
+  --color-secondary: #306800;
+  --color-on-secondary: #d6ffb5;
+  --color-secondary-container: #aef67b;
+  --color-on-secondary-container: #2a5d00;
+  --color-secondary-fixed: #aef67b;
+  --color-secondary-fixed-dim: #a1e76f;
+  --color-on-secondary-fixed: #204900;
+  --color-on-secondary-fixed-variant: #306800;
+
+  --color-tertiary: #8c4a00;
+  --color-tertiary-dim: #7b4000;
+  --color-on-tertiary: #fff0e7;
+  --color-tertiary-container: #ff9734;
+  --color-on-tertiary-container: #4d2600;
+  --color-tertiary-fixed: #ff9734;
+  --color-tertiary-fixed-dim: #f58600;
+  --color-on-tertiary-fixed: #291200;
+  --color-on-tertiary-fixed-variant: #5a2e00;
+
+  --color-error: #b31b25;
+  --color-error-dim: #9f0519;
+  --color-on-error: #ffefee;
+  --color-error-container: #fb5151;
+  --color-on-error-container: #570008;
+
+  --color-surface: #fff6dd;
+  --color-surface-dim: #dfd4b0;
+  --color-surface-bright: #fff6dd;
+  --color-on-surface: #332f1d;
+  --color-surface-variant: #e7ddba;
+  --color-on-surface-variant: #615b47;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #faf0d3;
+  --color-surface-container: #f2e8c9;
+  --color-surface-container-high: #ece2c1;
+  --color-surface-container-highest: #e7ddba;
+  --color-surface-tint: #00656f;
+
+  --color-background: #fff6dd;
+  --color-on-background: #332f1d;
+  --color-outline: #7d7760;
+  --color-outline-variant: #b4ad94;
+  --color-inverse-surface: #110e02;
+  --color-inverse-on-surface: #a49d85;
+  --color-inverse-primary: #59eafb;
+
+  /* ── Font families ── */
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+  --font-label: "Space Grotesk", sans-serif;
+
+  /* ── Border radii ── */
+  --radius-DEFAULT: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+  --radius-full: 9999px;
+
+  /* ── Bouncy animations ── */
+  --animate-bounce-in: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-gear-spin: gearSpin 8s linear infinite;
+}
+
+/* ── Base Reset ── */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Keyframes ── */
+@keyframes bounceIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes gearSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0px rgba(89,234,251,0); }
+  50% { box-shadow: 0 0 20px 6px rgba(89,234,251,0.5); }
+}
+
+/* ── Glass Panel ── */
+.glass-panel {
+  background: rgba(255, 246, 221, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+::-webkit-scrollbar-thumb { background: #00656f; border-radius: 3px; }
+
+/* ── Focus-visible for keyboard navigation ── */
+button:focus-visible, a:focus-visible {
+  outline: 2px solid #59eafb;
+  outline-offset: 2px;
+}
