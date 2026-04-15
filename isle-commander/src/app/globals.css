@@ -63,6 +63,19 @@
   --color-inverse-on-surface: #a49d85;
   --color-inverse-primary: #59eafb;
 
+  /* ── Biome Colors ── */
+  --color-biome-grass: #7ec850;
+  --color-biome-grass-dark: #5fa636;
+  --color-biome-sand: #f2d98a;
+  --color-biome-sand-dark: #d4b85a;
+  --color-biome-ocean: #3db8d4;
+  --color-biome-ocean-deep: #1a7a94;
+  --color-biome-ocean-shallow: #6dd5e8;
+  --color-biome-desert: #e8a847;
+  --color-biome-volcanic: #a855f7;
+  --color-biome-snow: #e8f0fe;
+  --color-biome-coral: #ff6b9d;
+
   /* ── Font families ── */
   --font-headline: "Plus Jakarta Sans", sans-serif;
   --font-body: "Plus Jakarta Sans", sans-serif;
@@ -78,6 +91,12 @@
   --animate-bounce-in: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-float: float 3s ease-in-out infinite;
   --animate-gear-spin: gearSpin 8s linear infinite;
+  --animate-tree-sway: treeSway 4s ease-in-out infinite;
+  --animate-cloud-drift: cloudDrift 25s linear infinite;
+  --animate-wave-shimmer: waveShimmer 6s ease-in-out infinite;
+  --animate-bubble-rise: bubbleRise 5s ease-in-out infinite;
+  --animate-leaf-fall: leafFall 8s ease-in-out infinite;
+  --animate-sparkle: sparkle 2s ease-in-out infinite;
 }
 
 /* ── Base Reset ── */
@@ -117,6 +136,88 @@ html, body {
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 0px rgba(89,234,251,0); }
   50% { box-shadow: 0 0 20px 6px rgba(89,234,251,0.5); }
+}
+
+/* ── Nature Keyframes ── */
+@keyframes treeSway {
+  0%, 100% { transform: rotate(-2deg) scaleY(1); }
+  25% { transform: rotate(1.5deg) scaleY(1.02); }
+  50% { transform: rotate(2deg) scaleY(1); }
+  75% { transform: rotate(-1.5deg) scaleY(0.98); }
+}
+
+@keyframes cloudDrift {
+  0% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(30px) translateY(-8px); }
+  50% { transform: translateX(60px) translateY(0); }
+  75% { transform: translateX(30px) translateY(8px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes waveShimmer {
+  0%, 100% { opacity: 0.15; transform: translateX(0) scaleX(1); }
+  50% { opacity: 0.35; transform: translateX(10px) scaleX(1.1); }
+}
+
+@keyframes bubbleRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-30px) scale(1.2); opacity: 0.3; }
+  100% { transform: translateY(-60px) scale(0.5); opacity: 0; }
+}
+
+@keyframes leafFall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+  25% { transform: translate(10px, 15px) rotate(45deg); opacity: 0.6; }
+  50% { transform: translate(-5px, 30px) rotate(90deg); opacity: 0.4; }
+  75% { transform: translate(8px, 45px) rotate(135deg); opacity: 0.2; }
+  100% { transform: translate(0, 60px) rotate(180deg); opacity: 0; }
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1) rotate(180deg); opacity: 1; }
+}
+
+@keyframes seagull {
+  0%, 100% { transform: translateX(0) translateY(0) scaleX(1); }
+  20% { transform: translateX(80px) translateY(-20px) scaleX(1); }
+  50% { transform: translateX(200px) translateY(-10px) scaleX(-1); }
+  80% { transform: translateX(80px) translateY(-30px) scaleX(-1); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.5); opacity: 0.2; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes flowerBloom {
+  0%, 100% { transform: scale(0.9) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(10deg); }
+}
+
+@keyframes fishSwim {
+  0% { transform: translateX(-30px) scaleX(1); }
+  45% { transform: translateX(30px) scaleX(1); }
+  50% { transform: translateX(30px) scaleX(-1); }
+  95% { transform: translateX(-30px) scaleX(-1); }
+  100% { transform: translateX(-30px) scaleX(1); }
+}
+
+@keyframes coinSpin {
+  0% { transform: translate(-50%, -50%) rotateY(0deg); }
+  100% { transform: translate(-50%, -50%) rotateY(360deg); }
+}
+
+@keyframes coinCollect {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(2); opacity: 0.8; }
+  100% { transform: scale(0) translateY(-40px); opacity: 0; }
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
 }
 
 /* ── Glass Panel ── */

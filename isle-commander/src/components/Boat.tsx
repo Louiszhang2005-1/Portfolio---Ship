@@ -1,166 +1,92 @@
 "use client";
 
-import { motion } from "framer-motion";
+import React from "react";
 
 interface BoatProps {
-  velocityX: number;
-  velocityY: number;
-  rotation: number;
+  boatHeadingRef: React.RefObject<HTMLDivElement | null>;
   speed: number;
 }
 
-export default function Boat({ velocityX, velocityY, rotation, speed }: BoatProps) {
-  // Tilt based on horizontal velocity for that "bouncy toy" feel
-  const tilt = velocityX * 6;
+/* Memoize — only re-renders when speed crosses the moving threshold */
+const Boat = React.memo(function Boat({ boatHeadingRef, speed }: BoatProps) {
   const isMoving = speed > 0.4;
 
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
-      {/* Wake trail — scales with speed */}
+      {/* Wake trail */}
       {isMoving && (
-        <motion.div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -z-10 rounded-full"
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -z-10 rounded-full opacity-30"
           style={{
-            width: 60 + speed * 12,
-            height: 30 + speed * 6,
-            background: "radial-gradient(ellipse, rgba(255,255,255,0.35) 0%, transparent 70%)",
-            filter: "blur(8px)",
-            transform: `translate(-50%, 20px) rotate(${rotation + 180}deg)`,
+            width: 70,
+            height: 30,
+            background: "radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 70%)",
           }}
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 0.8, repeat: Infinity }}
         />
       )}
 
-      {/* Boat container with rotation + tilt */}
-      <motion.div
-        className="relative flex flex-col items-center"
-        animate={{
-          rotate: tilt,
-          y: [0, -3, 0, 3, 0], // gentle bob
-        }}
-        transition={{
-          rotate: { type: "spring", stiffness: 150, damping: 15 },
-          y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
-        }}
-      >
+      {/* Boat body with bob */}
+      <div className="relative flex flex-col items-center" style={{ animation: "float 2.5s ease-in-out infinite" }}>
         {/* Steam puffs */}
         {isMoving && (
           <>
-            <SteamPuff delay={0} x={-8} />
-            <SteamPuff delay={0.6} x={8} />
+            <div className="absolute -top-6 rounded-full bg-white/50"
+              style={{ left: "calc(50% - 8px)", width: 8, height: 8, animation: "bubbleRise 1.2s ease-out infinite" }}
+            />
+            <div className="absolute -top-6 rounded-full bg-white/50"
+              style={{ left: "calc(50% + 4px)", width: 8, height: 8, animation: "bubbleRise 1.2s ease-out infinite 0.6s" }}
+            />
           </>
         )}
 
-        {/* Ship body */}
+        {/* Ship — heading rotation controlled via ref by game loop */}
         <div
+          ref={boatHeadingRef}
           className="relative w-28 h-28 flex items-center justify-center"
-          style={{ transform: `rotate(${rotation}deg)` }}
+          style={{ willChange: "transform" }}
         >
-          {/* Hull */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-20 h-24 relative">
-              {/* Main hull */}
-              <div
-                className="absolute inset-0 rounded-t-2xl rounded-b-[40%]"
-                style={{
-                  background: "linear-gradient(180deg, #00838f 0%, #006064 60%, #004d40 100%)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.2)",
-                }}
+              <div className="absolute inset-0 rounded-t-2xl rounded-b-[40%]"
+                style={{ background: "linear-gradient(180deg, #00838f 0%, #006064 60%, #004d40 100%)", boxShadow: "0 4px 12px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.2)" }}
               />
-              {/* Deck stripe */}
-              <div
-                className="absolute top-3 left-2 right-2 h-3 rounded-sm"
-                style={{ background: "#ffab40" }}
-              />
-              {/* Cabin */}
-              <div
-                className="absolute top-7 left-4 right-4 h-6 rounded-sm"
-                style={{
-                  background: "linear-gradient(180deg, #fff3e0, #ffe0b2)",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                }}
-              >
-                {/* Windows */}
+              <div className="absolute top-3 left-2 right-2 h-3 rounded-sm" style={{ background: "#ffab40" }} />
+              <div className="absolute top-7 left-4 right-4 h-6 rounded-sm" style={{ background: "linear-gradient(180deg, #fff3e0, #ffe0b2)", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
                 <div className="flex justify-center gap-1 mt-1">
                   <div className="w-2 h-2 rounded-sm bg-cyan-400 shadow-inner" />
                   <div className="w-2 h-2 rounded-sm bg-cyan-400 shadow-inner" />
                 </div>
               </div>
-              {/* Smokestack */}
-              <div
-                className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-5 rounded-t-sm"
-                style={{
-                  background: "linear-gradient(180deg, #d32f2f, #b71c1c)",
-                  boxShadow: "0 -2px 4px rgba(0,0,0,0.2)",
-                }}
-              >
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-5 rounded-t-sm" style={{ background: "linear-gradient(180deg, #d32f2f, #b71c1c)" }}>
                 <div className="absolute -top-1 left-0 right-0 h-1 bg-yellow-400 rounded-t-sm" />
               </div>
             </div>
           </div>
-
-          {/* Water ring */}
-          <div
-            className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-8 rounded-full opacity-40"
-            style={{
-              background: "radial-gradient(ellipse, rgba(255,255,255,0.5) 0%, transparent 70%)",
-            }}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-24 h-8 rounded-full opacity-40"
+            style={{ background: "radial-gradient(ellipse, rgba(255,255,255,0.5) 0%, transparent 70%)" }}
           />
         </div>
 
         {/* Flag */}
-        <motion.div
-          className="absolute -top-4 -right-1 w-8 h-5 rounded-sm shadow-sm flex items-center justify-center"
-          style={{
-            background: "linear-gradient(135deg, #e53935, #c62828)",
-            borderLeft: "2px solid #fff",
-          }}
-          animate={{ rotateY: [0, 15, 0, -15, 0] }}
-          transition={{ duration: 3, repeat: Infinity }}
+        <div className="absolute -top-4 -right-1 w-8 h-5 rounded-sm shadow-sm flex items-center justify-center"
+          style={{ background: "linear-gradient(135deg, #e53935, #c62828)", borderLeft: "2px solid #fff" }}
         >
-          <div className="text-[5px] text-white font-bold leading-none text-center select-none">
-            POLY
-            <br />
-            MTL
-          </div>
-        </motion.div>
-      </motion.div>
+          <div className="text-[5px] text-white font-bold leading-none text-center select-none">POLY<br/>MTL</div>
+        </div>
+      </div>
 
-      {/* WASD hint (fades after movement) */}
+      {/* WASD hint */}
       {!isMoving && (
-        <motion.div
-          className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: [0.4, 0.8, 0.4] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full font-label tracking-widest uppercase">
-            WASD to sail
+        <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 whitespace-nowrap animate-pulse">
+          <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-4 py-2 rounded-full font-label tracking-widest uppercase flex items-center gap-2">
+            <span className="bg-white/20 px-1.5 py-0.5 rounded text-[9px]">W/S</span> Throttle
+            <span className="text-white/30">·</span>
+            <span className="bg-white/20 px-1.5 py-0.5 rounded text-[9px]">A/D</span> Steer
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );
-}
+});
 
-/* ── Steam Puff Particle ── */
-function SteamPuff({ delay, x }: { delay: number; x: number }) {
-  return (
-    <motion.div
-      className="absolute -top-6 rounded-full bg-white/60"
-      style={{ left: `calc(50% + ${x}px)`, width: 8, height: 8 }}
-      animate={{
-        y: [-10, -30, -45],
-        opacity: [0, 0.7, 0],
-        scale: [0.5, 1.2, 0.3],
-      }}
-      transition={{
-        duration: 1.2,
-        repeat: Infinity,
-        delay,
-        ease: "easeOut",
-      }}
-    />
-  );
-}
+export default Boat;
