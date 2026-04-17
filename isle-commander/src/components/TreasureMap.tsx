@@ -63,7 +63,7 @@ const TreasureMap = React.memo(function TreasureMap({ isOpen, onClose, visitedId
           <div className="mt-3 flex items-center gap-4 text-[10px] font-label text-[#8a6e40] uppercase tracking-wider">
             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#e65100] inline-block" /> Internships</span>
             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#b8860b] inline-block" /> Mech/Aero</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#c62828] inline-block" /> Health Tech</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#c62828] inline-block" /> Robotics/IoT</span>
             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#6a1b9a] inline-block" /> Software/AI</span>
           </div>
         </div>
@@ -96,7 +96,7 @@ const TreasureMap = React.memo(function TreasureMap({ isOpen, onClose, visitedId
               style={{
                 left: "5%", top: "45%", width: "40%", height: "50%",
                 background: "radial-gradient(ellipse, rgba(198,40,40,0.25) 0%, transparent 70%)",
-                opacity: hoveredSector === "Medi-Bay" ? 1 : 0.6,
+                opacity: hoveredSector === "Robotics & IoT" ? 1 : 0.6,
               }}
             />
             {/* SE - Code Cove */}

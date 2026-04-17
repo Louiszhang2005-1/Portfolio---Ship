@@ -61,10 +61,19 @@ export default function DialogueBubble({ nearbyIsland, onInspect }: DialogueBubb
                 </div>
 
                 {isLocked ? (
-                  <p className="font-headline text-base font-bold text-gray-500 leading-snug">
-                    🔒 Captain, this mission is still <span className="text-red-600">INITIALIZING</span>. 
-                    Check back Summer 2026.
-                  </p>
+                  nearbyIsland?.id === "I-1" ? (
+                    <p className="font-headline text-base font-bold leading-snug" style={{ color: "#d97706" }}>
+                      ⚡ <span className="text-yellow-500">Sector Secured!</span> We&apos;re prepping for the{" "}
+                      <span className="text-red-500">Summer 2026 deployment</span> at the Nevada Gigafactory.{" "}
+                      Systems at <span className="text-green-500">100%!</span>
+                    </p>
+                  ) : (
+                    <p className="font-headline text-base font-bold leading-snug" style={{ color: "#d97706" }}>
+                      ⚡ <span className="text-yellow-600">Sector Under Construction.</span>{" "}
+                      <span className="text-red-500">Summer 2026 deployment expected.</span>{" "}
+                      High-voltage barrier active — do not approach.
+                    </p>
+                  )
                 ) : (
                   <p className="font-headline text-base font-bold text-gray-800 leading-snug">
                     Captain, we&apos;ve arrived at{" "}

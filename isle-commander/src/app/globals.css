@@ -237,3 +237,92 @@ button:focus-visible, a:focus-visible {
   outline: 2px solid #59eafb;
   outline-offset: 2px;
 }
+
+/* ══════════════════════════════════════════════════════
+   JUICE KEYFRAMES — added for high-energy polish pass
+   ══════════════════════════════════════════════════════ */
+
+/* Flag wave — skew/scale mimics cloth physics */
+@keyframes flagWave {
+  0%,  100% { transform: skewX(0deg)  scaleX(1)    scaleY(1);    }
+  20%        { transform: skewX(-7deg) scaleX(0.92) scaleY(1.04); }
+  40%        { transform: skewX(5deg)  scaleX(1.08) scaleY(0.96); }
+  60%        { transform: skewX(-4deg) scaleX(0.95) scaleY(1.02); }
+  80%        { transform: skewX(3deg)  scaleX(1.05) scaleY(0.98); }
+}
+
+/* Screen shake — applied to world layer on boundary bounce */
+@keyframes screenShake {
+  0%,  100% { transform: translate(0px,   0px  ); }
+  10%        { transform: translate(-6px, -3px  ); }
+  20%        { transform: translate(6px,   3px  ); }
+  30%        { transform: translate(-5px,  5px  ); }
+  40%        { transform: translate(5px,  -5px  ); }
+  50%        { transform: translate(-3px,  2px  ); }
+  60%        { transform: translate(3px,  -2px  ); }
+  70%        { transform: translate(-2px,  3px  ); }
+  80%        { transform: translate(2px,  -3px  ); }
+  90%        { transform: translate(-1px,  1px  ); }
+}
+
+/* High-voltage barrier — yellow glow pulse for Tesla island */
+@keyframes hvPulse {
+  0%,  100% { opacity: 0.55; box-shadow: 0 0 18px #ffee00, 0 0 36px #ff8800; }
+  50%        { opacity: 1;    box-shadow: 0 0 28px #ffee00, 0 0 55px #ff6600, 0 0 80px #ff3300; }
+}
+
+/* Lightning zap sparks around HV barrier */
+@keyframes hvZap {
+  0%,  88%, 100% { opacity: 0;   }
+  90%             { opacity: 1;   transform: scale(1.1);  }
+  93%             { opacity: 0.5; }
+  96%             { opacity: 1;   transform: scale(0.9);  }
+}
+
+/* Mechanical debris drift (3 variants for variety) */
+@keyframes mechDrift1 {
+  0%   { transform: translate(0px,    0px)  rotate(0deg);   }
+  33%  { transform: translate(18px,  -14px) rotate(118deg); }
+  66%  { transform: translate(-11px,  22px) rotate(237deg); }
+  100% { transform: translate(0px,    0px)  rotate(360deg); }
+}
+
+@keyframes mechDrift2 {
+  0%   { transform: translate(0px,   0px)  rotate(0deg);    }
+  33%  { transform: translate(-20px, 14px) rotate(-115deg); }
+  66%  { transform: translate(13px, -19px) rotate(-228deg); }
+  100% { transform: translate(0px,   0px)  rotate(-360deg); }
+}
+
+@keyframes mechDrift3 {
+  0%   { transform: translate(0px,  0px)   rotate(30deg);  }
+  50%  { transform: translate(12px, 25px)  rotate(210deg); }
+  100% { transform: translate(0px,  0px)   rotate(390deg); }
+}
+
+/* Needle jitter for HUD gauges — shimmy left/right when engine running */
+@keyframes needleJitter {
+  0%,  100% { transform: translateX(0px);  }
+  25%        { transform: translateX(2px);  }
+  50%        { transform: translateX(-1px); }
+  75%        { transform: translateX(3px);  }
+}
+
+/* Night-star twinkle */
+@keyframes nightStarTwinkle {
+  0%,  100% { opacity: 0.25; transform: scale(1);   }
+  50%        { opacity: 0.9;  transform: scale(1.4); }
+}
+
+/* Blueprint scan-line */
+@keyframes blueprintScanLine {
+  0%   { top: 0%;    opacity: 0.7; }
+  90%  { top: 100%;  opacity: 0.5; }
+  100% { top: 100%;  opacity: 0;   }
+}
+
+/* Deep-ocean parallax wave shimmer */
+@keyframes deepWave {
+  0%,  100% { opacity: 0.04; }
+  50%        { opacity: 0.09; }
+}
