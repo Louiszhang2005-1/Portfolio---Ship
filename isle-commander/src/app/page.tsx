@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
-import { useGameEngine } from "@/hooks/useGameEngine";
+import { useMemo, useState, useCallback } from "react";
+import { useMatterEngine } from "@/hooks/useMatterEngine";
 import GameWorld from "@/components/GameWorld";
-import Boat from "@/components/Boat";
+import ShipRenderer from "@/components/ShipRenderer";
 import HUD from "@/components/HUD";
 import DialogueBubble from "@/components/DialogueBubble";
 import BlueprintModal from "@/components/BlueprintModal";
 import MobileControls from "@/components/MobileControls";
 import TreasureMap from "@/components/TreasureMap";
 import MissionBriefing from "@/components/MissionBriefing";
+import PortShop from "@/components/PortShop";
+import AssemblyModal from "@/components/AssemblyModal";
 
 /* Seeded RNG for stable star positions */
 function seededRng(seed: number) {
@@ -29,13 +31,37 @@ const STARS = (() => {
 })();
 
 export default function Home() {
-  const game = useGameEngine();
+  const game = useMatterEngine();
 
-  // Clamp timeOfDay to 0-1, derive night opacity
+  // Assembly modal state
+  const [assemblyMission, setAssemblyMission] = useState<typeof game.inspectedIsland>(null);
+  const [assemblyOpen, setAssemblyOpen] = useState(false);
+
+  // When a blueprint is opened, check if it has assembly parts
+  const handleOpenBlueprint = useCallback(() => {
+    game.openBlueprint();
+  }, [game.openBlueprint]);
+
+  const handleOpenAssembly = useCallback(() => {
+    if (game.inspectedIsland?.assemblyParts) {
+      setAssemblyMission(game.inspectedIsland);
+      setAssemblyOpen(true);
+    }
+  }, [game.inspectedIsland]);
+
+  const handleCloseAssembly = useCallback(() => {
+    setAssemblyOpen(false);
+    setAssemblyMission(null);
+  }, []);
+
+  const handleAssemblyComplete = useCallback(() => {
+    // Assembly passed — could add bonus score here
+  }, []);
+
+  // Night cycle
   const nightOpacity = Math.min(1, Math.max(0, game.timeOfDay));
   const isNight = nightOpacity > 0.3;
 
-  // Pre-build a memoized star layer so it doesn't re-create on every render
   const starLayer = useMemo(() => (
     <div
       className="fixed inset-0 pointer-events-none"
@@ -66,17 +92,24 @@ export default function Home() {
         worldRef={game.worldRef}
         paralaxBgRef={game.paralaxBgRef}
         paralaxMidRef={game.paralaxMidRef}
+        paralaxFgRef={game.paralaxFgRef}
         nearbyIsland={game.nearbyIsland}
         visitedIds={game.visitedIds}
         collectedItems={game.collectedItems}
         fogRevealedZones={game.fogRevealedZones}
         onIslandClick={game.navigateToIsland}
-        hudEnemies={game.hudEnemies}
-        explodedBarrels={game.explodedBarrels}
+      />
+
+      {/* ── PHYSICS CANVAS (trajectory, gravity fields, hazards) ── */}
+      <canvas
+        ref={game.canvasRef}
+        className="fixed inset-0 pointer-events-none z-[4]"
+        width={typeof window !== "undefined" ? window.innerWidth : 1920}
+        height={typeof window !== "undefined" ? window.innerHeight : 1080}
+        style={{ width: "100%", height: "100%" }}
       />
 
       {/* ── DAY / NIGHT CYCLE ── */}
-      {/* Night sky darkening gradient */}
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
@@ -85,42 +118,44 @@ export default function Home() {
           transition: "background 1s ease",
         }}
       />
-      {/* Warm day vignette (fades at night) */}
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
           zIndex: 6,
-          background: `radial-gradient(ellipse at 50% 0%, rgba(255, 200, 80, ${(1 - nightOpacity) * 0.06}) 0%, transparent 60%)`,
+          background: `radial-gradient(ellipse at 50% 0%, rgba(0, 200, 255, ${(1 - nightOpacity) * 0.03}) 0%, transparent 60%)`,
           transition: "background 1s ease",
         }}
       />
 
-      {/* Stars */}
       {isNight && starLayer}
 
-      {/* ── BOAT ── */}
-      <Boat
+      {/* ── SHIP ── */}
+      <ShipRenderer
         boatHeadingRef={game.boatHeadingRef}
         speed={game.hudSpeed}
         boatSquash={game.boatSquash}
+        stressState={game.stressState}
+        inHazard={game.hazardState.inThermalZone}
       />
 
       {/* ── HUD ── */}
       <HUD
         visitedCount={game.visitedIds.size}
         speed={game.hudSpeed}
-        coreTemp={game.hudCoreTemp}
+        boilerPressure={game.hudBoilerPressure}
+        stressState={game.stressState}
         nearbyIsland={game.nearbyIsland}
         gameState={game.gameState}
         boatPosition={game.hudPosition}
         boatHeading={game.hudHeading}
-        nearestUnvisitedAngle={game.nearestUnvisitedAngle}
+        nearestGravityAngle={game.nearestGravityAngle}
         onIslandClick={game.navigateToIsland}
         onToggleMap={game.toggleMap}
         score={game.score}
         collectedItems={game.collectedItems}
-        hudBoilerHit={game.hudBoilerHit}
-        deckBoundaryWarning={game.deckBoundaryWarning}
+        isHullCritical={game.isHullCritical}
+        isBoilerCritical={game.isBoilerCritical}
+        isDocked={game.isDocked}
       />
 
       {/* ── DIALOGUE ── */}
@@ -138,6 +173,25 @@ export default function Home() {
         onClose={game.closeBlueprint}
       />
 
+      {/* ── ASSEMBLY MODAL ── */}
+      <AssemblyModal
+        mission={assemblyMission}
+        isOpen={assemblyOpen}
+        onClose={handleCloseAssembly}
+        onComplete={handleAssemblyComplete}
+      />
+
+      {/* ── PORT SHOP ── */}
+      <PortShop
+        isOpen={game.portShopOpen}
+        onClose={game.closePortShop}
+        score={game.score}
+        thrustLevel={game.thrustLevel}
+        hullStress={game.stressState.totalStress}
+        onRepairHull={game.repairHull}
+        onUpgradeThrust={game.upgradeThrust}
+      />
+
       {/* ── TREASURE MAP ── */}
       <TreasureMap
         isOpen={game.mapOpen}
@@ -149,7 +203,7 @@ export default function Home() {
       {/* ── MOBILE CONTROLS ── */}
       <MobileControls />
 
-      {/* ── MISSION BRIEFING (first visit onboarding) ── */}
+      {/* ── MISSION BRIEFING (onboarding) ── */}
       <MissionBriefing />
     </div>
   );
