@@ -198,6 +198,8 @@ export default function Home() {
         onClose={game.closeMap}
         visitedIds={game.visitedIds}
         onNavigate={game.navigateToIsland}
+        boatPosition={game.hudPosition}
+        boatHeading={game.hudHeading}
       />
 
       {/* ── MOBILE CONTROLS ── */}

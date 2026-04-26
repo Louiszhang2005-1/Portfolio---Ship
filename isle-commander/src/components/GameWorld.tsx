@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { missions, collectibles, Mission, fogZones } from "@/data/missions";
+import { missions, collectibles, Mission, fogZones, WORLD_BOUNDS } from "@/data/missions";
 import Island from "./Island";
 
 interface GameWorldProps {
@@ -94,28 +94,62 @@ const GameWorld = React.memo(function GameWorld({
       if (!sectorGroups[m.sector]) sectorGroups[m.sector] = [];
       sectorGroups[m.sector].push(m);
     });
+
+    const dist2 = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+      (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+    const origin = { x: 0, y: 0 };
+
     Object.values(sectorGroups).forEach((group) => {
-      for (let i = 0; i < group.length - 1; i++) {
-        lines.push({ x1: group[i].position.x, y1: group[i].position.y, x2: group[i + 1].position.x, y2: group[i + 1].position.y, color: group[i].sectorColor });
+      if (group.length === 0) return;
+
+      // Greedy nearest-neighbor: start from the island closest to origin,
+      // then always step to the nearest unvisited island. Eliminates criss-cross.
+      const remaining = [...group];
+      remaining.sort((a, b) => dist2(a.position, origin) - dist2(b.position, origin));
+      const ordered: Mission[] = [remaining.shift()!];
+      while (remaining.length > 0) {
+        const last = ordered[ordered.length - 1].position;
+        let bestIdx = 0;
+        let bestD = dist2(last, remaining[0].position);
+        for (let i = 1; i < remaining.length; i++) {
+          const d = dist2(last, remaining[i].position);
+          if (d < bestD) { bestD = d; bestIdx = i; }
+        }
+        ordered.push(remaining.splice(bestIdx, 1)[0]);
+      }
+
+      // Spoke: origin → sector's entry point (closest-to-origin island)
+      lines.push({
+        x1: 0, y1: 0,
+        x2: ordered[0].position.x, y2: ordered[0].position.y,
+        color: ordered[0].sectorColor,
+      });
+
+      // Chain the rest in nearest-neighbor order
+      for (let i = 0; i < ordered.length - 1; i++) {
+        lines.push({
+          x1: ordered[i].position.x, y1: ordered[i].position.y,
+          x2: ordered[i + 1].position.x, y2: ordered[i + 1].position.y,
+          color: ordered[i].sectorColor,
+        });
       }
     });
-    Object.values(sectorGroups).forEach((group) => {
-      lines.push({ x1: 0, y1: 0, x2: group[0].position.x, y2: group[0].position.y, color: group[0].sectorColor });
-    });
+
     return lines;
   }, []);
 
   const edgeFog = useMemo(() => {
     const rng = seededRandom(111);
     const items: { x: number; y: number; size: number }[] = [];
-    for (let i = 0; i < 16; i++) {
+    const span = WORLD_BOUNDS - 100; // leave 100u gap from corners
+    for (let i = 0; i < 32; i++) {
       const side = i % 4;
       let x = 0, y = 0;
-      if (side === 0) { x = -1100 + rng() * 2200; y = -1200; }
-      else if (side === 1) { x = -1100 + rng() * 2200; y = 1200; }
-      else if (side === 2) { x = -1200; y = -1100 + rng() * 2200; }
-      else { x = 1200; y = -1100 + rng() * 2200; }
-      items.push({ x, y, size: 120 + rng() * 100 });
+      if (side === 0) { x = -span + rng() * span * 2; y = -WORLD_BOUNDS; }
+      else if (side === 1) { x = -span + rng() * span * 2; y = WORLD_BOUNDS; }
+      else if (side === 2) { x = -WORLD_BOUNDS; y = -span + rng() * span * 2; }
+      else { x = WORLD_BOUNDS; y = -span + rng() * span * 2; }
+      items.push({ x, y, size: 160 + rng() * 140 });
     }
     return items;
   }, []);

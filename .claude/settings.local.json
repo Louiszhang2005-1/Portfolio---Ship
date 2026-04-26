@@ -5,7 +5,9 @@
       "Bash(grep -E \"\\\\.json$|\\\\.css$|\\\\.config\")",
       "Bash(npm run *)",
       "Bash(node -e ' *)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(mkdir -p \"C:/Users/zloui/.claude/plans\")",
+      "Read(//c/Users/zloui/.claude/plans/**)"
     ]
   }
 }

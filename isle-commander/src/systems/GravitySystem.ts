@@ -7,7 +7,7 @@ import { missions } from "@/data/missions";
 
 const G_CONSTANT = 0.00065;
 const MIN_DISTANCE = 60;       // Prevent infinite force at zero distance
-const MAX_DISTANCE = 900;      // Extended range for larger world
+export const MAX_DISTANCE = 900;      // Extended range for larger world
 const TRAJECTORY_STEPS = 90;   // ~1.5s lookahead at 60fps
 
 export interface Vec2 { x: number; y: number; }

@@ -6,7 +6,7 @@ import {
   missions, Mission, SPAWN_POSITION, WORLD_BOUNDS, COLLISION_RADIUS,
   collectibles, fogZones, FOG_REVEAL_RADIUS, hazardZones,
 } from "@/data/missions";
-import { calculateGravityForce, predictTrajectory, Vec2 } from "@/systems/GravitySystem";
+import { calculateGravityForce, predictTrajectory, Vec2, MAX_DISTANCE } from "@/systems/GravitySystem";
 import {
   StressState, createStressState, applyImpact, tickStress, isHullCritical,
 } from "@/systems/StressSystem";
@@ -25,6 +25,17 @@ const CAMERA_LERP = 0.09;
 const STORAGE_KEY = "isle-commander-visited";
 const STORAGE_KEY_COLLECTED = "isle-commander-collected";
 const COLLECT_RADIUS = 70;
+
+/* ─── Pre-computed mission color cache (computed once at module load) ─── */
+const missionColorCache: Record<string, { r: number; g: number; b: number }> = {};
+for (const _m of missions) {
+  const hex = _m.color.length === 7 ? _m.color : "#00ccff";
+  missionColorCache[_m.id] = {
+    r: parseInt(hex.slice(1, 3), 16),
+    g: parseInt(hex.slice(3, 5), 16),
+    b: parseInt(hex.slice(5, 7), 16),
+  };
+}
 
 /* ─── Types ─── */
 export type GameState = "sailing" | "near_island" | "inspecting" | "docked";
@@ -407,44 +418,144 @@ export function useMatterEngine(): MatterEngine {
           const cx = w / 2 - camera.x;
           const cy = h / 2 - camera.y;
 
-          // Draw gravity field rings around nodes — intensity scales with proximity
+          const colorCache = missionColorCache;
+
+          // Draw force fields: proximity-sensor activated
+          const time = frameCount.current * 0.03;
+          const FIELD_ACTIVATE_DIST = 700;
+          const FIELD_FULL_DIST = 350;
+
           for (const m of missions) {
+            if (m.status === "locked") continue;
+
             const screenX = m.position.x + cx;
             const screenY = m.position.y + cy;
-            if (screenX < -500 || screenX > w + 500 || screenY < -500 || screenY > h + 500) continue;
+            const fieldR = (m.fieldRadius ?? 250) * 1.4;
 
-            // Distance from ship to this node
+            if (screenX < -fieldR - 50 || screenX > w + fieldR + 50 || screenY < -fieldR - 50 || screenY > h + fieldR + 50) continue;
+
             const dx = m.position.x - ship.position.x;
             const dy = m.position.y - ship.position.y;
             const distToShip = Math.sqrt(dx * dx + dy * dy);
-            const proxFactor = Math.max(0, Math.min(1, 1 - distToShip / 800)); // 0=far, 1=close
+            const col = colorCache[m.id] ?? { r: 0, g: 200, b: 255 };
 
-            const maxRing = Math.min(500, m.gravityMass * 0.5);
-            const ringCount = 4 + Math.floor(proxFactor * 4); // 4-8 rings based on proximity
-            for (let r = 1; r <= ringCount; r++) {
-              const radius = (maxRing / ringCount) * r;
-              const baseAlpha = 0.04 + proxFactor * 0.12; // much brighter when close
-              const alpha = baseAlpha * (1 - r / (ringCount + 1));
-              const lineWidth = 1 + proxFactor * 1.5; // thicker when close
+            // Far away: single cheap ring
+            if (distToShip > FIELD_ACTIVATE_DIST) {
               ctx.beginPath();
-              ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
-              ctx.strokeStyle = `rgba(0, 200, 255, ${alpha})`;
-              ctx.lineWidth = lineWidth;
-              ctx.setLineDash([4 + proxFactor * 4, 4 + (1 - proxFactor) * 6]);
+              ctx.arc(screenX, screenY, fieldR * 0.7, 0, Math.PI * 2);
+              ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, 0.08)`;
+              ctx.lineWidth = 1;
+              ctx.setLineDash([4, 8]);
               ctx.stroke();
               ctx.setLineDash([]);
+              continue;
             }
 
-            // Bright inner glow when very close
-            if (proxFactor > 0.5) {
-              const glowAlpha = (proxFactor - 0.5) * 0.3;
-              const grad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, 80);
-              grad.addColorStop(0, `rgba(0, 200, 255, ${glowAlpha})`);
-              grad.addColorStop(1, "rgba(0, 200, 255, 0)");
-              ctx.fillStyle = grad;
-              ctx.beginPath();
-              ctx.arc(screenX, screenY, 80, 0, Math.PI * 2);
-              ctx.fill();
+            // Proximity: 0 at 700px, 1 at 350px
+            const proxFactor = Math.max(0, Math.min(1, (FIELD_ACTIVATE_DIST - distToShip) / (FIELD_ACTIVATE_DIST - FIELD_FULL_DIST)));
+
+            if (m.fieldType === "typhoon") {
+              const particleCount = Math.floor(20 + proxFactor * 45);
+              const baseAlpha = proxFactor * (0.3 + proxFactor * 0.25);
+              ctx.lineWidth = 2 + proxFactor * 2;
+              for (let i = 0; i < particleCount; i++) {
+                const seed = i * 137.508 + m.gravityMass;
+                const spiralAngle = (seed % (Math.PI * 2)) + time * (0.8 + (i % 3) * 0.3);
+                const radiusFraction = ((i * 0.618 + time * 0.08) % 1);
+                const r = radiusFraction * fieldR;
+                const px = screenX + Math.cos(spiralAngle + radiusFraction * 5) * r;
+                const py = screenY + Math.sin(spiralAngle + radiusFraction * 5) * r;
+                const trailAngle = spiralAngle - 0.2;
+                const trailR = r + 10;
+                const tx = screenX + Math.cos(trailAngle + radiusFraction * 5) * trailR;
+                const ty = screenY + Math.sin(trailAngle + radiusFraction * 5) * trailR;
+                const alpha = baseAlpha * (1 - radiusFraction * 0.6);
+                ctx.beginPath();
+                ctx.moveTo(tx, ty);
+                ctx.lineTo(px, py);
+                ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${alpha})`;
+                ctx.stroke();
+              }
+              if (proxFactor > 0.2) {
+                for (let ring = 0; ring < 2; ring++) {
+                  const ringR = fieldR * (0.6 + ring * 0.25);
+                  const ringAlpha = proxFactor * 0.15 * (1 - ring * 0.3);
+                  ctx.beginPath();
+                  for (let s = 0; s <= 20; s++) {
+                    const a = (s / 20) * Math.PI * 2;
+                    const wobble = Math.sin(a * 5 + time * 2 + ring) * (6 + proxFactor * 10);
+                    const rx = screenX + Math.cos(a) * (ringR + wobble);
+                    const ry = screenY + Math.sin(a) * (ringR + wobble);
+                    s === 0 ? ctx.moveTo(rx, ry) : ctx.lineTo(rx, ry);
+                  }
+                  ctx.closePath();
+                  ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${ringAlpha})`;
+                  ctx.lineWidth = 1.5;
+                  ctx.setLineDash([4, 4]);
+                  ctx.stroke();
+                  ctx.setLineDash([]);
+                }
+              }
+              if (proxFactor > 0.15) {
+                const coreAlpha = proxFactor * 0.2;
+                const grad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, fieldR * 0.45);
+                grad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, ${coreAlpha})`);
+                grad.addColorStop(1, `rgba(${col.r}, ${col.g}, ${col.b}, 0)`);
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, fieldR * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            } else {
+              const streamCount = Math.floor(12 + proxFactor * 18);
+              const baseAlpha = proxFactor * (0.25 + proxFactor * 0.2);
+              ctx.lineWidth = 1.5 + proxFactor * 1.5;
+              for (let i = 0; i < streamCount; i++) {
+                const angle = (i / streamCount) * Math.PI * 2 + time * 0.35;
+                const startR = fieldR * (0.88 + Math.sin(i * 2.3 + time) * 0.08);
+                const endR = 12 + Math.sin(i * 1.7 + time * 1.5) * 6;
+                ctx.beginPath();
+                for (let s = 0; s <= 6; s++) {
+                  const t = s / 6;
+                  const r = startR + (endR - startR) * t * t;
+                  const a = angle + t * 2;
+                  ctx.lineTo(screenX + Math.cos(a) * r, screenY + Math.sin(a) * r);
+                }
+                ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${baseAlpha * (0.5 + Math.sin(i * 3.1 + time * 2) * 0.3)})`;
+                ctx.stroke();
+              }
+              const dotCount = Math.floor(10 + proxFactor * 16);
+              for (let i = 0; i < dotCount; i++) {
+                const seed = i * 0.618 * Math.PI * 2;
+                const orbitSpeed = 0.4 + (i % 4) * 0.25;
+                const radiusFraction = ((i * 0.382 + time * 0.06 * orbitSpeed) % 1);
+                const r = radiusFraction * fieldR;
+                const a = seed + time * orbitSpeed + (1 - radiusFraction) * 3;
+                const dotSize = (2 + proxFactor * 2) * (1 - radiusFraction * 0.5);
+                ctx.beginPath();
+                ctx.arc(screenX + Math.cos(a) * r, screenY + Math.sin(a) * r, dotSize, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${baseAlpha * (1 - radiusFraction) * 1.3})`;
+                ctx.fill();
+              }
+              if (proxFactor > 0.2) {
+                const hAlpha = proxFactor * 0.2;
+                const grad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, fieldR * 0.35);
+                grad.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, ${hAlpha})`);
+                grad.addColorStop(1, `rgba(${col.r}, ${col.g}, ${col.b}, 0)`);
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, fieldR * 0.35, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              if (proxFactor > 0.1) {
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, fieldR, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${proxFactor * 0.15})`;
+                ctx.lineWidth = 1.5 + proxFactor;
+                ctx.setLineDash([3, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+              }
             }
           }
 
