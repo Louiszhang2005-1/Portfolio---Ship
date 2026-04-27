@@ -17,9 +17,9 @@ import {
 
 /* ─── Constants ─── */
 const SHIP_MASS = 8;
-const SHIP_FRICTION_AIR = 0.018;
-const THRUST_FORCE = 0.0035;
-const REVERSE_FORCE = 0.002;
+const SHIP_FRICTION_AIR = 0.016;
+const THRUST_FORCE = 0.006;
+const REVERSE_FORCE = 0.0035;
 const TURN_TORQUE = 0.06;
 const CAMERA_LERP = 0.09;
 const STORAGE_KEY = "isle-commander-visited";

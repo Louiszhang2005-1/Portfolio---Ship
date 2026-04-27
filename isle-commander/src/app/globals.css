@@ -382,3 +382,35 @@ button:focus-visible, a:focus-visible {
   25%        { transform: rotate(3deg);  }
   75%        { transform: rotate(-3deg); }
 }
+
+/* ══════════════════════════════════════════════════════
+   HOLOGRAPHIC BRIEFING KEYFRAMES
+   ══════════════════════════════════════════════════════ */
+
+/* CRT hologram flicker — three stutter frames per cycle */
+@keyframes holoFlicker {
+  0%, 18%, 22%, 48%, 52%, 100% { opacity: 1;    }
+  20%, 50%                      { opacity: 0.42; }
+  70%                           { opacity: 0.82; }
+}
+
+/* Scanline band scrolling downward */
+@keyframes scanlines {
+  0%   { background-position-y: 0;   }
+  100% { background-position-y: 6px; }
+}
+
+/* Glitch horizontal snap */
+@keyframes glitchShift {
+  0%, 89%, 100%  { transform: translateX(0);                         }
+  90%            { transform: translateX(-3px) skewX(-2deg);         }
+  93%            { transform: translateX(3px)  skewX(2deg);          }
+  96%            { transform: translateX(-2px);                      }
+}
+
+/* Hologram fade-out collapse */
+@keyframes holoFadeOut {
+  0%   { opacity: 1;   transform: scale(1);    filter: blur(0);   }
+  60%  { opacity: 0.6; transform: scale(0.96); filter: blur(1px); }
+  100% { opacity: 0;   transform: scale(0.92); filter: blur(3px); }
+}

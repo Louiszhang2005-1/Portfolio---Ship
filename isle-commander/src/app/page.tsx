@@ -9,7 +9,7 @@ import DialogueBubble from "@/components/DialogueBubble";
 import BlueprintModal from "@/components/BlueprintModal";
 import MobileControls from "@/components/MobileControls";
 import TreasureMap from "@/components/TreasureMap";
-import MissionBriefing from "@/components/MissionBriefing";
+import MissionBriefing, { SprocketCornerButton } from "@/components/MissionBriefing";
 import PortShop from "@/components/PortShop";
 import AssemblyModal from "@/components/AssemblyModal";
 
@@ -207,6 +207,7 @@ export default function Home() {
 
       {/* ── MISSION BRIEFING (onboarding) ── */}
       <MissionBriefing />
+      <SprocketCornerButton />
     </div>
   );
 }
