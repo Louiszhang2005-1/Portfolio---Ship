@@ -145,9 +145,13 @@ export default function BlueprintModal({ mission, isOpen, onClose }: BlueprintMo
                     animate={{ rotate: [0, 3, 0, -3, 0] }}
                     transition={{ duration: 5, repeat: Infinity }}
                   >
-                    <span className="text-5xl" style={{ filter: "sepia(100%) hue-rotate(165deg) saturate(400%) brightness(1.3)" }}>
-                      {mission.emoji}
-                    </span>
+                    {mission.logo ? (
+                      <img src={mission.logo} alt={`${mission.title} logo`} className="max-h-14 max-w-16 rounded bg-white/95 object-contain p-1" />
+                    ) : (
+                      <span className="text-5xl" style={{ filter: "sepia(100%) hue-rotate(165deg) saturate(400%) brightness(1.3)" }}>
+                        {mission.emoji}
+                      </span>
+                    )}
                     {/* Cross-hair overlay */}
                     <div className="absolute inset-0 pointer-events-none">
                       <div className="absolute top-1/2 left-0 right-0 h-px" style={{ background: `${BP.accent}30` }} />

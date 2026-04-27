@@ -238,6 +238,99 @@ button:focus-visible, a:focus-visible {
   outline-offset: 2px;
 }
 
+.game-vignette {
+  background:
+    radial-gradient(circle at 50% 42%, transparent 0 46%, rgba(2, 6, 23, 0.16) 70%, rgba(2, 6, 23, 0.5) 100%),
+    linear-gradient(90deg, rgba(2, 6, 23, 0.18), transparent 14%, transparent 86%, rgba(2, 6, 23, 0.18));
+}
+
+.game-scanline {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.025) 3px,
+    rgba(255, 255, 255, 0.025) 4px
+  );
+}
+
+.game-corner {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-color: rgba(207, 250, 254, 0.32);
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.28));
+}
+
+.launch-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(125, 252, 255, 0.12), transparent 16%, transparent 84%, rgba(125, 252, 255, 0.12)),
+    linear-gradient(180deg, rgba(125, 252, 255, 0.1), transparent 18%, transparent 82%, rgba(125, 252, 255, 0.08));
+  opacity: 0.85;
+}
+
+.hollow-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(125, 252, 255, 0.1), rgba(14, 165, 233, 0.04) 58%, transparent 70%),
+    linear-gradient(180deg, rgba(125, 252, 255, 0.08), rgba(16, 185, 129, 0.04));
+  filter: drop-shadow(0 0 24px rgba(34, 211, 238, 0.42));
+  overflow: hidden;
+}
+
+.hollow-avatar__scan {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 15%;
+  height: 2px;
+  background: rgba(207, 250, 254, 0.8);
+  box-shadow: 0 0 18px rgba(125, 252, 255, 0.9);
+  animation: hollowScan 3s ease-in-out infinite;
+}
+
+.hollow-avatar__base {
+  position: absolute;
+  bottom: 2px;
+  width: 56%;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(125, 252, 255, 0.2);
+  filter: blur(2px);
+}
+
+@keyframes hollowScan {
+  0%, 100% { transform: translateY(0); opacity: 0.18; }
+  45% { transform: translateY(92px); opacity: 0.95; }
+  55% { transform: translateY(92px); opacity: 0.35; }
+}
+
+.game-current-ring {
+  border: 2px dashed var(--current-color);
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--current-color) 22%, transparent) 0%, transparent 48%),
+    conic-gradient(from 0deg, transparent, color-mix(in srgb, var(--current-color) 34%, transparent), transparent 32%, transparent 100%);
+  opacity: 0.36;
+  animation: currentSpin 12s linear infinite, currentPulse 2.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--current-color) 42%, transparent));
+}
+
+@keyframes currentSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes currentPulse {
+  0%, 100% { opacity: 0.22; scale: 0.98; }
+  50% { opacity: 0.48; scale: 1.03; }
+}
+
 /* ══════════════════════════════════════════════════════
    JUICE KEYFRAMES — added for high-energy polish pass
    ══════════════════════════════════════════════════════ */

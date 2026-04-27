@@ -38,7 +38,13 @@ const QUADRANT_BG: Record<string, string> = {
   SE: "linear-gradient(315deg, rgba(106,27,154,0.15) 0%, transparent 80%)",
 };
 
-const MAX_SPEED = 6;
+const MAX_SPEED = 5.1;
+
+const INTERNSHIP_ROUTE = [
+  { title: "Montreal", logo: "/logo/city-of-montreal.gif" },
+  { title: "Lockheed", logo: "/logo/lockheed-martin.jpg" },
+  { title: "Tesla", logo: "/logo/tesla.jpg" },
+];
 
 /* Spring-physics offset hook for HUD elements */
 function useSpringOffset(cameraX: number, cameraY: number, factor: number = 0.03) {
@@ -206,12 +212,23 @@ export default function HUD({
       {/* ── Top Bar ── */}
       <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 md:px-6 py-3">
         <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 20 }}>
-          <h1 className="text-xl md:text-2xl font-black text-white italic font-headline tracking-tight drop-shadow-lg">
-            Mech Simulator
+          <h1 className="text-xl md:text-2xl font-black text-white font-headline tracking-normal drop-shadow-lg">
+            Isle Commander
           </h1>
-          <p className="text-[9px] font-label uppercase tracking-[0.3em] text-cyan-200/60 -mt-0.5">
-            The Physics-Driven Odyssey
+          <p className="text-[9px] font-label uppercase tracking-[0.28em] text-cyan-100/62 -mt-0.5">
+            Louis Zhang Portfolio
           </p>
+          <div className="mt-2 hidden items-center gap-1.5 rounded-md border border-cyan-100/15 bg-slate-950/45 px-2 py-1 backdrop-blur-md lg:flex">
+            <span className="mr-1 font-label text-[8px] font-black uppercase tracking-[0.2em] text-cyan-100/42">Route</span>
+            {INTERNSHIP_ROUTE.map((item, index) => (
+              <div key={item.title} className="flex items-center gap-1">
+                <span className="grid h-6 w-8 place-items-center overflow-hidden rounded bg-white p-0.5">
+                  <img src={item.logo} alt={`${item.title} logo`} className="max-h-full max-w-full object-contain" />
+                </span>
+                {index < INTERNSHIP_ROUTE.length - 1 && <span className="text-[10px] text-cyan-100/35">/</span>}
+              </div>
+            ))}
+          </div>
         </motion.div>
 
         <motion.div className="flex items-center gap-3" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}>

@@ -12,6 +12,7 @@ import TreasureMap from "@/components/TreasureMap";
 import MissionBriefing, { SprocketCornerButton } from "@/components/MissionBriefing";
 import PortShop from "@/components/PortShop";
 import AssemblyModal from "@/components/AssemblyModal";
+import GameChrome from "@/components/GameChrome";
 
 /* Seeded RNG for stable star positions */
 function seededRng(seed: number) {
@@ -128,6 +129,7 @@ export default function Home() {
       />
 
       {isNight && starLayer}
+      <GameChrome />
 
       {/* ── SHIP ── */}
       <ShipRenderer

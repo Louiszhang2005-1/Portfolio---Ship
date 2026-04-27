@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { missions, collectibles, Mission, fogZones, WORLD_BOUNDS } from "@/data/missions";
+import { missions, collectibles, Mission, fogZones, WORLD_BOUNDS, hazardZones, barrels } from "@/data/missions";
 import Island from "./Island";
 
 interface GameWorldProps {
@@ -26,7 +25,7 @@ const FG_SIZE = 7000;
 function seededRandom(seed: number) {
   let s = seed;
   return () => {
-    s = (s * 16807 + 0) % 2147483647;
+    s = (s * 16807) % 2147483647;
     return (s - 1) / 2147483646;
   };
 }
@@ -42,49 +41,40 @@ const GameWorld = React.memo(function GameWorld({
   fogRevealedZones,
   onIslandClick,
 }: GameWorldProps) {
-
-  const decorations = useMemo(() => {
+  const decor = useMemo(() => {
     const rng = seededRandom(42);
-    const trees: { x: number; y: number; emoji: string; size: number }[] = [];
-    const treeEmojis = ['🌲', '🌳', '🌴', '🌿'];
-    for (let i = 0; i < 80; i++) {
-      trees.push({
-        x: (rng() - 0.5) * 4200, y: (rng() - 0.5) * 4200,
-        emoji: treeEmojis[Math.floor(rng() * treeEmojis.length)],
-        size: 16 + rng() * 14,
-      });
-    }
-    const flowers: { x: number; y: number; emoji: string; size: number }[] = [];
-    const flowerEmojis = ['🌸', '🌺', '🌻', '🌷', '🌼'];
-    for (let i = 0; i < 30; i++) {
-      flowers.push({
-        x: (rng() - 0.5) * 3800, y: (rng() - 0.5) * 3800,
-        emoji: flowerEmojis[Math.floor(rng() * flowerEmojis.length)],
-        size: 10 + rng() * 8,
-      });
-    }
-    const rocks: { x: number; y: number; size: number; color: string }[] = [];
-    for (let i = 0; i < 15; i++) {
-      const shade = 140 + rng() * 60;
-      rocks.push({
-        x: (rng() - 0.5) * 4200, y: (rng() - 0.5) * 4200,
-        size: 10 + rng() * 16,
-        color: `rgb(${shade}, ${shade - 10}, ${shade - 20})`,
-      });
-    }
-    return { trees, flowers, rocks };
+    const islets = Array.from({ length: 80 }, () => ({
+      x: (rng() - 0.5) * 4200,
+      y: (rng() - 0.5) * 4200,
+      size: 18 + rng() * 20,
+      hue: 82 + rng() * 45,
+      rot: rng() * 70 - 35,
+    }));
+    const buoys = Array.from({ length: 34 }, (_, i) => ({
+      x: (rng() - 0.5) * 3900,
+      y: (rng() - 0.5) * 3900,
+      size: 10 + rng() * 8,
+      color: ["#ff4f58", "#ffd166", "#06d6a0", "#3fc7ff"][i % 4],
+      delay: rng() * 2,
+    }));
+    const rocks = Array.from({ length: 18 }, () => ({
+      x: (rng() - 0.5) * 4200,
+      y: (rng() - 0.5) * 4200,
+      size: 12 + rng() * 18,
+      shade: 120 + rng() * 70,
+    }));
+    return { islets, buoys, rocks };
   }, []);
 
   const clouds = useMemo(() => {
     const rng = seededRandom(77);
-    const items: { x: number; y: number; size: number; delay: number; opacity: number }[] = [];
-    for (let i = 0; i < 8; i++) {
-      items.push({
-        x: (rng() - 0.5) * 4500, y: (rng() - 0.5) * 4500,
-        size: 70 + rng() * 80, delay: rng() * 20, opacity: 0.5 + rng() * 0.3,
-      });
-    }
-    return items;
+    return Array.from({ length: 10 }, () => ({
+      x: (rng() - 0.5) * 4500,
+      y: (rng() - 0.5) * 4500,
+      size: 80 + rng() * 100,
+      delay: rng() * 20,
+      opacity: 0.42 + rng() * 0.28,
+    }));
   }, []);
 
   const pathLines = useMemo(() => {
@@ -100,36 +90,32 @@ const GameWorld = React.memo(function GameWorld({
     const origin = { x: 0, y: 0 };
 
     Object.values(sectorGroups).forEach((group) => {
-      if (group.length === 0) return;
-
-      // Greedy nearest-neighbor: start from the island closest to origin,
-      // then always step to the nearest unvisited island. Eliminates criss-cross.
-      const remaining = [...group];
-      remaining.sort((a, b) => dist2(a.position, origin) - dist2(b.position, origin));
+      const internshipOrder = ["I-4", "I-2", "I-1", "I-3"];
+      const remaining = group[0]?.sector === "Internship Shores"
+        ? [...group].sort((a, b) => internshipOrder.indexOf(a.id) - internshipOrder.indexOf(b.id))
+        : [...group].sort((a, b) => dist2(a.position, origin) - dist2(b.position, origin));
       const ordered: Mission[] = [remaining.shift()!];
-      while (remaining.length > 0) {
+      while (remaining.length > 0 && group[0]?.sector !== "Internship Shores") {
         const last = ordered[ordered.length - 1].position;
         let bestIdx = 0;
         let bestD = dist2(last, remaining[0].position);
         for (let i = 1; i < remaining.length; i++) {
           const d = dist2(last, remaining[i].position);
-          if (d < bestD) { bestD = d; bestIdx = i; }
+          if (d < bestD) {
+            bestD = d;
+            bestIdx = i;
+          }
         }
         ordered.push(remaining.splice(bestIdx, 1)[0]);
       }
-
-      // Spoke: origin → sector's entry point (closest-to-origin island)
-      lines.push({
-        x1: 0, y1: 0,
-        x2: ordered[0].position.x, y2: ordered[0].position.y,
-        color: ordered[0].sectorColor,
-      });
-
-      // Chain the rest in nearest-neighbor order
+      if (group[0]?.sector === "Internship Shores") ordered.push(...remaining);
+      lines.push({ x1: 0, y1: 0, x2: ordered[0].position.x, y2: ordered[0].position.y, color: ordered[0].sectorColor });
       for (let i = 0; i < ordered.length - 1; i++) {
         lines.push({
-          x1: ordered[i].position.x, y1: ordered[i].position.y,
-          x2: ordered[i + 1].position.x, y2: ordered[i + 1].position.y,
+          x1: ordered[i].position.x,
+          y1: ordered[i].position.y,
+          x2: ordered[i + 1].position.x,
+          y2: ordered[i + 1].position.y,
           color: ordered[i].sectorColor,
         });
       }
@@ -140,287 +126,302 @@ const GameWorld = React.memo(function GameWorld({
 
   const edgeFog = useMemo(() => {
     const rng = seededRandom(111);
-    const items: { x: number; y: number; size: number }[] = [];
-    const span = WORLD_BOUNDS - 100; // leave 100u gap from corners
-    for (let i = 0; i < 32; i++) {
+    const span = WORLD_BOUNDS - 100;
+    return Array.from({ length: 32 }, (_, i) => {
       const side = i % 4;
-      let x = 0, y = 0;
-      if (side === 0) { x = -span + rng() * span * 2; y = -WORLD_BOUNDS; }
-      else if (side === 1) { x = -span + rng() * span * 2; y = WORLD_BOUNDS; }
-      else if (side === 2) { x = -WORLD_BOUNDS; y = -span + rng() * span * 2; }
-      else { x = WORLD_BOUNDS; y = -span + rng() * span * 2; }
-      items.push({ x, y, size: 160 + rng() * 140 });
-    }
-    return items;
+      if (side === 0) return { x: -span + rng() * span * 2, y: -WORLD_BOUNDS, size: 160 + rng() * 140 };
+      if (side === 1) return { x: -span + rng() * span * 2, y: WORLD_BOUNDS, size: 160 + rng() * 140 };
+      if (side === 2) return { x: -WORLD_BOUNDS, y: -span + rng() * span * 2, size: 160 + rng() * 140 };
+      return { x: WORLD_BOUNDS, y: -span + rng() * span * 2, size: 160 + rng() * 140 };
+    });
   }, []);
 
-  const mechFish = useMemo(() => {
+  const fish = useMemo(() => {
     const rng = seededRandom(888);
-    return Array.from({ length: 10 }, (_, i) => ({
-      x: (rng() - 0.5) * 2400,
-      y: (rng() - 0.5) * 2400,
-      scale: 0.75 + rng() * 0.7,
-      speed: 7 + rng() * 9,
+    return Array.from({ length: 12 }, (_, i) => ({
+      x: (rng() - 0.5) * 2600,
+      y: (rng() - 0.5) * 2600,
+      scale: 0.75 + rng() * 0.75,
+      speed: 7 + rng() * 10,
       delay: rng() * 12,
-      color: `hsl(${185 + rng() * 30}, 70%, ${50 + rng() * 20}%)`,
+      color: `hsl(${180 + rng() * 35}, 78%, ${52 + rng() * 18}%)`,
+      flip: i % 2 === 0 ? 1 : -1,
     }));
   }, []);
 
-  const mechDebris = useMemo(() => {
+  const midDebris = useMemo(() => {
     const rng = seededRandom(555);
-    const debrisEmojis = ['⚙️', '⚙️', '⚙️', '📐', '🔩', '⚙️', '📋'];
-    const driftAnims = ['mechDrift1', 'mechDrift2', 'mechDrift3'];
-    const items: { x: number; y: number; size: number; emoji: string; anim: string; delay: number; opacity: number }[] = [];
-    for (let i = 0; i < 40; i++) {
-      items.push({
-        x: (rng() - 0.5) * (MID_SIZE - 200),
-        y: (rng() - 0.5) * (MID_SIZE - 200),
-        size: 14 + rng() * 18,
-        emoji: debrisEmojis[Math.floor(rng() * debrisEmojis.length)],
-        anim: driftAnims[Math.floor(rng() * driftAnims.length)],
-        delay: rng() * 12,
-        opacity: 0.18 + rng() * 0.22,
-      });
-    }
-    return items;
+    const driftAnims = ["mechDrift1", "mechDrift2", "mechDrift3"];
+    return Array.from({ length: 44 }, (_, i) => ({
+      x: (rng() - 0.5) * (MID_SIZE - 200),
+      y: (rng() - 0.5) * (MID_SIZE - 200),
+      size: 12 + rng() * 18,
+      anim: driftAnims[i % 3],
+      delay: rng() * 12,
+      opacity: 0.13 + rng() * 0.2,
+      color: rng() > 0.5 ? "#facc15" : "#cbd5e1",
+    }));
   }, []);
 
-  // Foreground hazard debris (1.2x speed layer)
-  const fgDebris = useMemo(() => {
+  const fgParticles = useMemo(() => {
     const rng = seededRandom(666);
-    const items: { x: number; y: number; size: number; emoji: string; delay: number; opacity: number }[] = [];
-    const hazardEmojis = ['🔥', '💨', '⚡', '🌡️', '💧'];
-    for (let i = 0; i < 20; i++) {
-      items.push({
-        x: (rng() - 0.5) * (FG_SIZE - 200),
-        y: (rng() - 0.5) * (FG_SIZE - 200),
-        size: 12 + rng() * 14,
-        emoji: hazardEmojis[Math.floor(rng() * hazardEmojis.length)],
-        delay: rng() * 10,
-        opacity: 0.12 + rng() * 0.15,
-      });
-    }
-    return items;
+    const kinds = ["spark", "steam", "drop"] as const;
+    return Array.from({ length: 24 }, (_, i) => ({
+      x: (rng() - 0.5) * (FG_SIZE - 200),
+      y: (rng() - 0.5) * (FG_SIZE - 200),
+      size: 10 + rng() * 16,
+      delay: rng() * 10,
+      opacity: 0.1 + rng() * 0.16,
+      kind: kinds[i % 3],
+    }));
   }, []);
 
   return (
     <div
       className="absolute inset-0 overflow-hidden"
-      style={{ background: "radial-gradient(ellipse at center, #3db8d4 0%, #2a9ab8 20%, #1a7a94 45%, #0d4a5c 75%, #0a3040 100%)" }}
+      style={{
+        background:
+          "radial-gradient(circle at 18% 12%, rgba(255,255,255,0.32) 0 7%, transparent 18%), radial-gradient(circle at 82% 22%, rgba(255,214,102,0.22) 0 8%, transparent 19%), linear-gradient(160deg, #54d8e8 0%, #2fb6ca 30%, #1689a6 62%, #075166 100%)",
+      }}
     >
-      {/* ── PARALLAX LAYER 1: Starfield Background (0.5× speed) ── */}
       <div
         ref={paralaxBgRef}
         className="absolute pointer-events-none"
-        style={{
-          width: BG_SIZE,
-          height: BG_SIZE,
-          left: "50%",
-          top: "50%",
-          willChange: "transform",
-          zIndex: 1,
-        }}
+        style={{ width: BG_SIZE, height: BG_SIZE, left: "50%", top: "50%", willChange: "transform", zIndex: 1 }}
       >
-        <div className="absolute inset-0 opacity-[0.05]"
+        <div
+          className="absolute inset-0 opacity-[0.12]"
           style={{
-            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(255,255,255,0.8) 39px, transparent 40px)",
-            animation: "deepWave 8s ease-in-out infinite",
+            backgroundImage: "repeating-linear-gradient(135deg, transparent 0 44px, rgba(255,255,255,0.38) 45px, transparent 48px)",
+            animation: "deepWave 7s ease-in-out infinite",
           }}
         />
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.6) 80px)",
-          }}
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 2px)", backgroundSize: "90px 90px" }}
         />
       </div>
 
-      {/* ── PARALLAX LAYER 2: Mechanical Debris (0.65× speed) ── */}
       <div
         ref={paralaxMidRef}
         className="absolute pointer-events-none"
-        style={{
-          width: MID_SIZE,
-          height: MID_SIZE,
-          left: "50%",
-          top: "50%",
-          willChange: "transform",
-          zIndex: 2,
-        }}
+        style={{ width: MID_SIZE, height: MID_SIZE, left: "50%", top: "50%", willChange: "transform", zIndex: 2 }}
       >
-        {mechDebris.map((item, i) => (
+        {midDebris.map((item, i) => (
           <div
             key={`debris-${i}`}
-            className="absolute select-none"
+            className="absolute rounded-sm"
             style={{
               left: item.x + MID_SIZE / 2,
               top: item.y + MID_SIZE / 2,
-              fontSize: item.size,
+              width: item.size,
+              height: item.size * 0.55,
               opacity: item.opacity,
               transform: "translate(-50%, -50%)",
               animation: `${item.anim} ${18 + (i % 7) * 4}s linear infinite`,
               animationDelay: `${item.delay}s`,
-              filter: "grayscale(40%) brightness(1.4)",
+              background: item.color,
+              border: "2px solid rgba(255,255,255,0.25)",
+              boxShadow: "0 5px 10px rgba(0,0,0,0.14)",
             }}
-          >
-            {item.emoji}
-          </div>
+          />
         ))}
       </div>
 
-      {/* ── PARALLAX LAYER 3: Foreground Hazard Debris (1.2× speed) ── */}
       <div
         ref={paralaxFgRef}
         className="absolute pointer-events-none"
-        style={{
-          width: FG_SIZE,
-          height: FG_SIZE,
-          left: "50%",
-          top: "50%",
-          willChange: "transform",
-          zIndex: 5,
-        }}
+        style={{ width: FG_SIZE, height: FG_SIZE, left: "50%", top: "50%", willChange: "transform", zIndex: 5 }}
       >
-        {fgDebris.map((item, i) => (
+        {fgParticles.map((item, i) => (
           <div
             key={`fg-${i}`}
-            className="absolute select-none"
+            className="absolute rounded-full"
             style={{
               left: item.x + FG_SIZE / 2,
               top: item.y + FG_SIZE / 2,
-              fontSize: item.size,
+              width: item.kind === "spark" ? item.size * 0.55 : item.size,
+              height: item.kind === "steam" ? item.size * 0.7 : item.size,
               opacity: item.opacity,
               transform: "translate(-50%, -50%)",
               animation: `mechDrift${(i % 3) + 1} ${15 + (i % 5) * 3}s linear infinite`,
               animationDelay: `${item.delay}s`,
-              filter: "blur(1px)",
+              background: item.kind === "spark" ? "#ffd166" : item.kind === "drop" ? "#b6f3ff" : "rgba(255,255,255,0.78)",
+              filter: "blur(0.5px)",
             }}
-          >
-            {item.emoji}
-          </div>
+          />
         ))}
       </div>
 
-      {/* ── World container ── */}
       <div
         ref={worldRef}
         className="absolute"
-        style={{
-          width: WORLD_SIZE,
-          height: WORLD_SIZE,
-          left: "50%",
-          top: "50%",
-          willChange: "transform",
-          transform: "translate3d(0,0,0)",
-          zIndex: 3,
-        }}
+        style={{ width: WORLD_SIZE, height: WORLD_SIZE, left: "50%", top: "50%", willChange: "transform", transform: "translate3d(0,0,0)", zIndex: 3 }}
       >
-        {/* Biome patches — darker, more industrial */}
-        <div className="absolute rounded-[50%]" style={{ left: HALF - 1200, top: HALF - 1100, width: 700, height: 500, background: "radial-gradient(ellipse, rgba(0,100,120,0.25) 0%, rgba(0,80,100,0.12) 50%, transparent 80%)" }} />
-        <div className="absolute rounded-[50%]" style={{ left: HALF + 500, top: HALF - 1100, width: 800, height: 600, background: "radial-gradient(ellipse, rgba(184,134,11,0.18) 0%, rgba(140,100,0,0.08) 50%, transparent 80%)" }} />
-        <div className="absolute rounded-[50%]" style={{ left: HALF - 1200, top: HALF + 200, width: 650, height: 500, background: "radial-gradient(ellipse, rgba(198,40,40,0.18) 0%, rgba(150,30,30,0.08) 50%, transparent 80%)" }} />
-        <div className="absolute rounded-[50%]" style={{ left: HALF + 200, top: HALF + 300, width: 800, height: 650, background: "radial-gradient(ellipse, rgba(106,27,154,0.18) 0%, rgba(80,20,120,0.08) 50%, transparent 80%)" }} />
-        <div className="absolute rounded-full" style={{ left: HALF - 150, top: HALF - 150, width: 300, height: 300, background: "radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%)" }} />
+        <div className="absolute rounded-[50%]" style={{ left: HALF - 1450, top: HALF - 1350, width: 1100, height: 900, background: "radial-gradient(ellipse, rgba(255,145,77,0.26) 0%, rgba(255,145,77,0.08) 55%, transparent 78%)" }} />
+        <div className="absolute rounded-[50%]" style={{ left: HALF + 300, top: HALF - 1350, width: 1200, height: 900, background: "radial-gradient(ellipse, rgba(255,220,109,0.24) 0%, rgba(255,220,109,0.08) 55%, transparent 78%)" }} />
+        <div className="absolute rounded-[50%]" style={{ left: HALF - 1450, top: HALF + 200, width: 1050, height: 850, background: "radial-gradient(ellipse, rgba(248,113,113,0.22) 0%, rgba(248,113,113,0.07) 55%, transparent 78%)" }} />
+        <div className="absolute rounded-[50%]" style={{ left: HALF + 150, top: HALF + 220, width: 1250, height: 900, background: "radial-gradient(ellipse, rgba(192,132,252,0.23) 0%, rgba(192,132,252,0.08) 55%, transparent 78%)" }} />
+        <div className="absolute rounded-full" style={{ left: HALF - 160, top: HALF - 160, width: 320, height: 320, background: "radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(77,213,232,0.08) 52%, transparent 72%)" }} />
 
-        {/* Grid dot texture */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, rgba(0,200,255,0.6) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+        <div className="absolute inset-0 opacity-[0.045]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 2px)", backgroundSize: "58px 58px" }} />
 
-        {/* Paths */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 ${WORLD_SIZE} ${WORLD_SIZE}`}>
+        <svg className="absolute inset-0 h-full w-full pointer-events-none" viewBox={`0 0 ${WORLD_SIZE} ${WORLD_SIZE}`}>
           {pathLines.map((line, i) => (
             <g key={i}>
-              <line x1={line.x1 + HALF} y1={line.y1 + HALF + 3} x2={line.x2 + HALF} y2={line.y2 + HALF + 3} stroke="rgba(0,0,0,0.12)" strokeWidth="16" strokeLinecap="round" />
-              <line x1={line.x1 + HALF} y1={line.y1 + HALF} x2={line.x2 + HALF} y2={line.y2 + HALF} stroke={line.color} strokeWidth="12" strokeLinecap="round" opacity="0.3" />
-              <line x1={line.x1 + HALF} y1={line.y1 + HALF} x2={line.x2 + HALF} y2={line.y2 + HALF} stroke="rgba(0,200,255,0.2)" strokeWidth="2" strokeLinecap="round" strokeDasharray="10 16" />
+              <line x1={line.x1 + HALF} y1={line.y1 + HALF + 5} x2={line.x2 + HALF} y2={line.y2 + HALF + 5} stroke="rgba(3,20,30,0.18)" strokeWidth="20" strokeLinecap="round" />
+              <line x1={line.x1 + HALF} y1={line.y1 + HALF} x2={line.x2 + HALF} y2={line.y2 + HALF} stroke="rgba(255,255,255,0.55)" strokeWidth="12" strokeLinecap="round" />
+              <line x1={line.x1 + HALF} y1={line.y1 + HALF} x2={line.x2 + HALF} y2={line.y2 + HALF} stroke={line.color} strokeWidth="5" strokeLinecap="round" strokeDasharray="14 18" opacity="0.62" />
             </g>
           ))}
         </svg>
 
-        {/* Trees */}
-        {decorations.trees.map((t, i) => (
-          <div key={`t${i}`} className="absolute select-none pointer-events-none" style={{ left: t.x + HALF, top: t.y + HALF, fontSize: t.size, transform: "translate(-50%, -50%)" }}>{t.emoji}</div>
+        {decor.islets.map((t, i) => (
+          <div key={`islet-${i}`} className="absolute pointer-events-none" style={{ left: t.x + HALF, top: t.y + HALF, transform: "translate(-50%, -50%)" }}>
+            <div
+              className="rounded-[45%] shadow-md"
+              style={{
+                width: t.size * 1.9,
+                height: t.size,
+                background: `linear-gradient(145deg, hsl(${t.hue}, 45%, 56%), hsl(${t.hue}, 45%, 34%))`,
+                border: "2px solid rgba(75,55,25,0.35)",
+                transform: `rotate(${t.rot}deg)`,
+              }}
+            />
+          </div>
         ))}
 
-        {/* Flowers */}
-        {decorations.flowers.map((f, i) => (
-          <div key={`f${i}`} className="absolute select-none pointer-events-none" style={{ left: f.x + HALF, top: f.y + HALF, fontSize: f.size, transform: "translate(-50%, -50%)" }}>{f.emoji}</div>
+        {decor.buoys.map((b, i) => (
+          <div key={`buoy-${i}`} className="absolute pointer-events-none" style={{ left: b.x + HALF, top: b.y + HALF, transform: "translate(-50%, -50%)", animation: `float ${2.5 + (i % 4) * 0.4}s ease-in-out infinite`, animationDelay: `${b.delay}s` }}>
+            <div
+              className="rounded-full shadow-lg"
+              style={{
+                width: b.size,
+                height: b.size,
+                background: `linear-gradient(145deg, #fff, ${b.color})`,
+                border: "2px solid rgba(255,255,255,0.72)",
+                boxShadow: `0 0 12px ${b.color}66`,
+              }}
+            />
+            <div className="mx-auto h-5 w-0.5 bg-white/40" />
+          </div>
         ))}
 
-        {/* Rocks */}
-        {decorations.rocks.map((r, i) => (
-          <div key={`r${i}`} className="absolute select-none pointer-events-none" style={{ left: r.x + HALF, top: r.y + HALF, width: r.size, height: r.size * 0.65, borderRadius: "35% 40% 45% 30%", background: r.color, boxShadow: "1px 2px 4px rgba(0,0,0,0.15)" }} />
-        ))}
-
-        {/* Mechanical Fish */}
-        {mechFish.map((f, i) => (
+        {decor.rocks.map((r, i) => (
           <div
-            key={`fish-${i}`}
-            className="absolute pointer-events-none select-none"
+            key={`rock-${i}`}
+            className="absolute pointer-events-none"
             style={{
-              left: f.x + HALF,
-              top: f.y + HALF,
-              transform: `translate(-50%, -50%) scale(${f.scale})`,
-              animation: `fishSwim ${f.speed}s linear infinite`,
-              animationDelay: `${f.delay}s`,
-              zIndex: 12,
+              left: r.x + HALF,
+              top: r.y + HALF,
+              width: r.size,
+              height: r.size * 0.65,
+              borderRadius: "35% 40% 45% 30%",
+              background: `rgb(${r.shade}, ${r.shade - 10}, ${r.shade - 22})`,
+              boxShadow: "1px 4px 8px rgba(0,0,0,0.2)",
             }}
-          >
-            <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-              <span style={{ fontSize: 14, filter: "hue-rotate(160deg) brightness(1.15)" }}>⚙️</span>
+          />
+        ))}
+
+        {hazardZones.map((zone) => (
+          <div
+            key={zone.id}
+            className="absolute pointer-events-none rounded-full"
+            style={{
+              left: zone.position.x + HALF - zone.radius,
+              top: zone.position.y + HALF - zone.radius,
+              width: zone.radius * 2,
+              height: zone.radius * 2,
+              border: zone.type === "thermal" ? "3px dashed rgba(255,116,54,0.5)" : "3px dashed rgba(124,92,255,0.42)",
+              background: zone.type === "thermal"
+                ? "radial-gradient(circle, rgba(255,134,54,0.25), rgba(255,134,54,0.06) 55%, transparent 72%)"
+                : "radial-gradient(circle, rgba(124,92,255,0.2), rgba(124,92,255,0.05) 55%, transparent 72%)",
+              animation: zone.type === "thermal" ? "thermalPulse 1.6s ease-in-out infinite" : "pressureCompress 2s ease-in-out infinite",
+              zIndex: 4,
+            }}
+          />
+        ))}
+
+        {missions.filter((mission) => mission.status === "active").map((mission) => {
+          const radius = (mission.fieldRadius ?? 250) * 1.28;
+          return (
+            <div
+              key={`current-${mission.id}`}
+              className="absolute pointer-events-none rounded-full game-current-ring"
+              style={{
+                left: mission.position.x + HALF - radius,
+                top: mission.position.y + HALF - radius,
+                width: radius * 2,
+                height: radius * 2,
+                borderColor: `${mission.color}44`,
+                ["--current-color" as string]: mission.color,
+              }}
+            >
+              <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/70" />
+            </div>
+          );
+        })}
+
+        {fish.map((f, i) => (
+          <div key={`fish-${i}`} className="absolute pointer-events-none" style={{ left: f.x + HALF, top: f.y + HALF, transform: `translate(-50%, -50%) scale(${f.scale})`, animation: `fishSwim ${f.speed}s linear infinite`, animationDelay: `${f.delay}s`, zIndex: 12 }}>
+            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", transform: `scaleX(${f.flip})` }}>
+              <span className="h-3 w-5 rounded-full border border-white/45 bg-cyan-300/70" />
               <div style={{ width: 0, height: 0, borderTop: "6px solid transparent", borderBottom: "6px solid transparent", borderLeft: `9px solid ${f.color}`, marginLeft: 1 }} />
             </div>
           </div>
         ))}
 
-        {/* Collectibles */}
         {collectibles.map((item) => {
           if (collectedItems.has(item.id)) return null;
           const isCoin = item.type === "coin";
           return (
             <div
               key={item.id}
-              className="absolute pointer-events-none select-none"
+              className="absolute pointer-events-none"
               style={{
                 left: item.position.x + HALF,
                 top: item.position.y + HALF,
                 transform: "translate(-50%, -50%)",
-                animation: isCoin
-                  ? `float ${2.8 + ((item.position.x * 7) % 1.5)}s ease-in-out infinite`
-                  : `float ${3.5 + ((item.position.y * 5) % 1.2)}s ease-in-out infinite`,
+                animation: isCoin ? `float ${2.8 + ((item.position.x * 7) % 1.5)}s ease-in-out infinite` : `float ${3.5 + ((item.position.y * 5) % 1.2)}s ease-in-out infinite`,
                 zIndex: 15,
               }}
             >
               {isCoin ? (
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shadow-lg"
-                  style={{ background: "radial-gradient(circle at 35% 35%, #ffd700, #c8860a)", boxShadow: "0 0 8px rgba(255,215,0,0.7), 0 2px 4px rgba(0,0,0,0.3)", border: "2px solid rgba(255,255,255,0.4)" }}>
-                  <span className="text-[9px] font-black text-yellow-900 leading-none">$</span>
+                <div className="grid h-7 w-7 place-items-center rounded-full border-2 border-white/55 bg-gradient-to-br from-yellow-200 to-amber-600 shadow-[0_0_12px_rgba(255,215,0,0.72)]">
+                  <span className="text-[9px] font-black text-yellow-950">$</span>
                 </div>
               ) : (
-                <div className="w-10 h-8 rounded-lg flex items-center justify-center shadow-xl"
-                  style={{ background: "linear-gradient(145deg, #8B6914, #5c440d)", boxShadow: "0 0 14px rgba(255,200,50,0.8), 0 3px 6px rgba(0,0,0,0.4)", border: "2px solid rgba(255,215,0,0.5)" }}>
-                  <span className="text-lg">💎</span>
+                <div className="grid h-8 w-10 place-items-center rounded-lg border-2 border-cyan-100/60 bg-gradient-to-br from-cyan-200 to-blue-600 shadow-[0_0_14px_rgba(125,211,252,0.85)]">
+                  <span className="h-3 w-4 rotate-45 rounded-sm bg-cyan-100 shadow-[0_0_10px_rgba(125,211,252,0.9)]" />
                 </div>
               )}
             </div>
           );
         })}
 
-        {/* Clouds */}
-        {clouds.map((c, i) => (
-          <div key={`c${i}`} className="absolute pointer-events-none select-none" style={{ left: c.x + HALF, top: c.y + HALF, width: c.size, height: c.size * 0.45, opacity: c.opacity * 0.6, animation: `cloudDrift ${22 + (i % 4) * 4}s linear infinite`, animationDelay: `${c.delay}s`, zIndex: 25 }}>
-            <div className="relative w-full h-full">
-              <div className="absolute rounded-full bg-white/40" style={{ left: '10%', top: '30%', width: '45%', height: '70%' }} />
-              <div className="absolute rounded-full bg-white/50" style={{ left: '30%', top: '10%', width: '50%', height: '80%' }} />
-              <div className="absolute rounded-full bg-white/35" style={{ left: '55%', top: '25%', width: '35%', height: '60%' }} />
+        {barrels.map((barrel) => (
+          <div key={barrel.id} className="absolute pointer-events-none" style={{ left: barrel.position.x + HALF, top: barrel.position.y + HALF, transform: "translate(-50%, -50%)", zIndex: 14 }}>
+            <div className="h-12 w-12 rounded-full border-4 border-orange-200 bg-gradient-to-br from-red-500 to-red-800 shadow-xl">
+              <div className="mx-auto mt-2 h-2 w-7 rounded bg-yellow-300/80" />
+              <div className="mx-auto mt-3 h-2 w-7 rounded bg-yellow-300/80" />
             </div>
           </div>
         ))}
 
-        {/* Boundary fog */}
-        {edgeFog.map((ec, i) => (
-          <div key={`ec${i}`} className="absolute pointer-events-none rounded-full" style={{ left: ec.x + HALF - ec.size / 2, top: ec.y + HALF - ec.size / 2, width: ec.size, height: ec.size * 0.6, background: "radial-gradient(ellipse, rgba(10,22,40,0.7) 0%, rgba(10,22,40,0.2) 50%, transparent 70%)", zIndex: 26 }} />
+        {clouds.map((c, i) => (
+          <div key={`cloud-${i}`} className="absolute pointer-events-none" style={{ left: c.x + HALF, top: c.y + HALF, width: c.size, height: c.size * 0.45, opacity: c.opacity * 0.55, animation: `cloudDrift ${22 + (i % 4) * 4}s linear infinite`, animationDelay: `${c.delay}s`, zIndex: 25 }}>
+            <div className="relative h-full w-full">
+              <div className="absolute rounded-full bg-white/50" style={{ left: "10%", top: "30%", width: "45%", height: "70%" }} />
+              <div className="absolute rounded-full bg-white/60" style={{ left: "30%", top: "10%", width: "50%", height: "80%" }} />
+              <div className="absolute rounded-full bg-white/45" style={{ left: "55%", top: "25%", width: "35%", height: "60%" }} />
+            </div>
+          </div>
         ))}
 
-        {/* Fog of war */}
+        {edgeFog.map((ec, i) => (
+          <div key={`edge-fog-${i}`} className="absolute pointer-events-none rounded-full" style={{ left: ec.x + HALF - ec.size / 2, top: ec.y + HALF - ec.size / 2, width: ec.size, height: ec.size * 0.6, background: "radial-gradient(ellipse, rgba(10,22,40,0.56) 0%, rgba(10,22,40,0.16) 52%, transparent 72%)", zIndex: 26 }} />
+        ))}
+
         {fogZones.map((zone, i) => (
           <div
             key={`fog-${i}`}
@@ -430,26 +431,24 @@ const GameWorld = React.memo(function GameWorld({
               top: zone.y + HALF - zone.size / 2,
               width: zone.size,
               height: zone.size,
-              background: "radial-gradient(ellipse, rgba(5,15,30,0.88) 0%, rgba(10,22,40,0.65) 40%, rgba(10,20,35,0.3) 70%, transparent 100%)",
+              background: "radial-gradient(ellipse, rgba(5,15,30,0.82) 0%, rgba(10,22,40,0.58) 40%, rgba(10,20,35,0.24) 70%, transparent 100%)",
               transition: "opacity 1.8s ease-out",
-              opacity: fogRevealedZones.has(i) ? 0 : 0.92,
+              opacity: fogRevealedZones.has(i) ? 0 : 0.9,
               zIndex: 24,
             }}
           />
         ))}
 
-        {/* Spawn port — Home Port */}
         <div className="absolute flex flex-col items-center" style={{ left: HALF, top: HALF, transform: "translate(-50%, -50%)", zIndex: 10 }}>
-          <div className="w-32 h-32 rounded-full flex items-center justify-center" style={{ background: "radial-gradient(circle, rgba(0,212,255,0.15) 0%, rgba(0,100,140,0.1) 50%, transparent 100%)", boxShadow: "0 0 35px rgba(0,212,255,0.15)" }}>
-            <div className="w-18 h-18 rounded-full bg-cyan-400/10 flex items-center justify-center border-2 border-cyan-400/20">
-              <span className="text-3xl">🏠</span>
+          <div className="flex h-36 w-36 items-center justify-center rounded-full" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(0,180,215,0.18) 48%, transparent 72%)", boxShadow: "0 0 35px rgba(255,255,255,0.18)" }}>
+            <div className="flex h-20 w-20 items-center justify-center rounded-[22px] border-4 border-amber-100 bg-amber-300 shadow-xl" style={{ transform: "rotateX(54deg) rotateZ(-45deg)" }}>
+              <div className="h-9 w-9 rounded bg-red-500 shadow-inner" />
             </div>
           </div>
-          <span className="mt-2 text-white text-[11px] font-label uppercase tracking-widest font-bold drop-shadow-lg bg-black/40 px-3 py-1 rounded-full border border-cyan-400/20">Home Port</span>
-          <span className="mt-1 text-cyan-300/50 text-[8px] font-label uppercase tracking-wider">Press ENTER to dock</span>
+          <span className="mt-1 rounded-lg border border-white/40 bg-slate-950/55 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-white drop-shadow-lg">Home Port</span>
+          <span className="mt-1 rounded-full bg-cyan-400/20 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-cyan-100">Press ENTER to dock</span>
         </div>
 
-        {/* Islands */}
         {missions.map((mission, index) => (
           <div key={mission.id} style={{ position: "absolute", left: HALF, top: HALF }}>
             <Island
@@ -462,11 +461,10 @@ const GameWorld = React.memo(function GameWorld({
           </div>
         ))}
 
-        {/* Sector labels */}
-        <SectorLabel label="Internship Shores" x={-900} y={-780} color="#e65100" emoji="⚡" />
-        <SectorLabel label="Aero Atoll" x={1000} y={-700} color="#b8860b" emoji="🚀" />
-        <SectorLabel label="Robotics & IoT" x={-800} y={750} color="#c62828" emoji="🤖" />
-        <SectorLabel label="Code Cove" x={750} y={800} color="#6a1b9a" emoji="💻" />
+        <SectorLabel label="Internship Shores" x={-900} y={-780} color="#ff914d" />
+        <SectorLabel label="Aero Atoll" x={1000} y={-700} color="#facc15" />
+        <SectorLabel label="Robotics & IoT" x={-800} y={750} color="#f87171" />
+        <SectorLabel label="Code Cove" x={750} y={800} color="#c084fc" />
       </div>
     </div>
   );
@@ -474,11 +472,11 @@ const GameWorld = React.memo(function GameWorld({
 
 export default GameWorld;
 
-function SectorLabel({ label, x, y, color, emoji }: { label: string; x: number; y: number; color: string; emoji: string }) {
+function SectorLabel({ label, x, y, color }: { label: string; x: number; y: number; color: string }) {
   return (
     <div className="absolute font-headline flex flex-col items-center gap-1 select-none pointer-events-none" style={{ left: x + WORLD_SIZE / 2, top: y + WORLD_SIZE / 2, transform: "translate(-50%, -50%)" }}>
-      <span className="text-4xl" style={{ opacity: 0.2 }}>{emoji}</span>
-      <span className="text-2xl font-black uppercase tracking-[0.25em]" style={{ color, opacity: 0.12, textShadow: `0 0 20px ${color}` }}>{label}</span>
+      <span className="h-2 w-[104px] rounded-full" style={{ background: color, opacity: 0.18, boxShadow: `0 0 20px ${color}` }} />
+      <span className="text-2xl font-black uppercase tracking-[0.25em]" style={{ color, opacity: 0.18, textShadow: `0 0 20px ${color}` }}>{label}</span>
     </div>
   );
 }

@@ -25,6 +25,7 @@ export interface Mission {
   details: string;
   emoji: string;
   color: string;
+  logo?: string;
   image?: string;
   github?: string;
   demo?: string;
@@ -47,12 +48,13 @@ export const missions: Mission[] = [
     subtitle: "Scientific Intern · Water Testing · May–Aug 2025",
     status: "active",
     landmark: "A waterfront city hall with municipal water-testing labs and bubbling sample beakers",
-    position: { x: -1300, y: -400 },
+    position: { x: -560, y: -420 },
     skills: ["Water Quality Testing", "Lab Analysis", "Environmental Monitoring", "Data Analysis", "Python"],
     details:
       "Scientific Intern at the City of Montreal's Water Department (May–Aug 2025). Performed hands-on water testing across municipal sources — collected and analyzed samples for chemical, physical, and microbiological parameters to validate compliance with Quebec drinking-water standards. Operated lab instrumentation, logged results into the city's monitoring pipelines, and supported the data analysis workflow that informs distribution-network decisions.",
     emoji: "💧",
     color: "#0277bd",
+    logo: "/logo/city-of-montreal.gif",
     gravityMass: 600,
     fieldType: "typhoon",
     fieldRadius: 220,
@@ -65,12 +67,13 @@ export const missions: Mission[] = [
     subtitle: "Mechanical Engineering Intern · Ship Integrations · Winter 2026",
     status: "active",
     landmark: "A naval shipyard with a docked frigate, gantry cranes, and integration scaffolding",
-    position: { x: -400, y: -400 },
+    position: { x: -1050, y: -760 },
     skills: ["Ship Systems Integration", "3D CAD Modeling", "Mechanical Design", "GD&T", "FEA", "CATIA"],
     details:
       "Mechanical Engineering Intern at Lockheed Martin on the Ship Integrations team (Winter 2026). Supported the mechanical integration of subsystems aboard naval platforms — 3D CAD modeling, structural layouts, fit-checks, and tolerance/GD&T documentation for shipboard hardware. Worked on FEA validation for mounting structures and contributed to the assembly drawings and interface documentation that govern how subsystems are physically integrated into the ship.",
     emoji: "⚓",
     color: "#1a3a6b",
+    logo: "/logo/lockheed-martin.jpg",
     gravityMass: 800,
     fieldType: "gravity",
     fieldRadius: 260,
@@ -85,12 +88,13 @@ export const missions: Mission[] = [
     subtitle: "Manufacturing Engineering Intern · Cell Engineering · Summer–Fall 2026",
     status: "active",
     landmark: "A massive gigafactory with electric arcs and battery cell assembly lines",
-    position: { x: -400, y: -1200 },
+    position: { x: -1500, y: -1180 },
     skills: ["Manufacturing Engineering", "Battery Cell Engineering", "Process Optimization", "Automation", "Python", "Lean Six Sigma"],
     details:
       "Incoming Manufacturing Engineering Intern at Tesla on the Cell Engineering team (Summer–Fall 2026, Nevada Gigafactory). Will work on the manufacturing processes behind Tesla's battery cells — production-line optimization, process improvement, and automation systems supporting next-generation cell architectures and high-volume cell output.",
     emoji: "⚡",
     color: "#e65100",
+    logo: "/logo/tesla.jpg",
     gravityMass: 1000,
     fieldType: "typhoon",
     fieldRadius: 280,
@@ -106,7 +110,7 @@ export const missions: Mission[] = [
     subtitle: "Secret Mission",
     status: "locked",
     landmark: "A black monolith with a pulsing question mark beacon",
-    position: { x: -1300, y: -1200 },
+    position: { x: -1540, y: -430 },
     skills: [],
     details: "Classified — mission briefing not yet available. Stay curious.",
     emoji: "❓",
@@ -305,70 +309,6 @@ export const missions: Mission[] = [
   // 💻 Code Cove (Southeast) — Software & AI Projects
   // ═══════════════════════════════════════════════════
   {
-    id: "P-6",
-    sector: "Code Cove",
-    sectorColor: "#6a1b9a",
-    title: "Saight",
-    subtitle: "Winner — DeltaHacks X · AI Assistive Tech",
-    status: "active",
-    landmark: "A glowing navigation beacon with AI pathfinding rays",
-    position: { x: 1650, y: 400 },
-    skills: ["Computer Vision", "AI", "Mobile Development", "Accessibility"],
-    details:
-      "🏆 Winner at DeltaHacks X. An AI-powered assistive technology for the visually impaired. Uses a smartphone-mapped white cane for navigation, providing real-time audio feedback about surroundings and obstacles. Built with computer vision and spatial mapping.",
-    emoji: "👁️",
-    color: "#6a1b9a",
-    gravityMass: 700,
-    fieldType: "gravity",
-    fieldRadius: 260,
-    github: "https://github.com/Louiszhang2005-1",
-    demo: "#",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAq3y0pe5-zj445NQYKmzbJNwSt6pwKm-RRaSroWdOsq0I9WvDU4tlIf_le6clLEAU1EU_s99pamo_RefOqMxhNv1gYMTs8tPSds7Jkb4ZRhxpEU9UQElEzVJSAoqViv4qiKxxL8YG9QR_aSkWObExq5swckGUTYd52SXI-msGM0W3mwkQaAm_mq0ahm8uaF08K-nIl5jUrIwBV32yVovAyJQHnlDfbkAO7aB-NtTFoGg_DNNFBe_PUARobX_wFyaL9hpiLkuNQrBNF",
-  },
-  {
-    id: "P-7",
-    sector: "Code Cove",
-    sectorColor: "#6a1b9a",
-    title: "STARSCAN.AI",
-    subtitle: "AI Document Analysis",
-    status: "active",
-    landmark: "A floating platform with orbiting satellite imagery and data streams",
-    position: { x: 300, y: 1200 },
-    skills: ["AI", "NLP", "NASA APIs", "React", "Python"],
-    details:
-      "AI-powered system designed to analyze technical and scientific documents, including NASA documentation. Uses advanced NLP to extract insights, cross-reference data, and generate summaries from complex engineering specs and research papers.",
-    emoji: "🛰️",
-    color: "#e65100",
-    gravityMass: 600,
-    fieldType: "typhoon",
-    fieldRadius: 240,
-    github: "https://github.com/Louiszhang2005-1",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAq3y0pe5-zj445NQYKmzbJNwSt6pwKm-RRaSroWdOsq0I9WvDU4tlIf_le6clLEAU1EU_s99pamo_RefOqMxhNv1gYMTs8tPSds7Jkb4ZRhxpEU9UQElEzVJSAoqViv4qiKxxL8YG9QR_aSkWObExq5swckGUTYd52SXI-msGM0W3mwkQaAm_mq0ahm8uaF08K-nIl5jUrIwBV32yVovAyJQHnlDfbkAO7aB-NtTFoGg_DNNFBe_PUARobX_wFyaL9hpiLkuNQrBNF",
-  },
-  {
-    id: "P-8",
-    sector: "Code Cove",
-    sectorColor: "#6a1b9a",
-    title: "LingoBattles",
-    subtitle: "ConUHacks IX · Competitive Language Game",
-    status: "active",
-    landmark: "An arena with glowing word bubbles and dueling stations",
-    position: { x: 950, y: 400 },
-    skills: ["React", "WebSockets", "Real-time Multiplayer", "Game Design"],
-    details:
-      "A fast-paced, real-time competitive party game for language learning built at ConUHacks IX (Jan 2024). Players battle head-to-head in timed vocabulary challenges with live leaderboards and particle effects.",
-    emoji: "🎮",
-    color: "#00695c",
-    gravityMass: 550,
-    fieldType: "gravity",
-    fieldRadius: 220,
-    github: "https://github.com/Louiszhang2005-1",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAq3y0pe5-zj445NQYKmzbJNwSt6pwKm-RRaSroWdOsq0I9WvDU4tlIf_le6clLEAU1EU_s99pamo_RefOqMxhNv1gYMTs8tPSds7Jkb4ZRhxpEU9UQElEzVJSAoqViv4qiKxxL8YG9QR_aSkWObExq5swckGUTYd52SXI-msGM0W3mwkQaAm_mq0ahm8uaF08K-nIl5jUrIwBV32yVovAyJQHnlDfbkAO7aB-NtTFoGg_DNNFBe_PUARobX_wFyaL9hpiLkuNQrBNF",
-  },
-  {
     id: "P-12",
     sector: "Code Cove",
     sectorColor: "#6a1b9a",
@@ -449,7 +389,7 @@ export const sectorInfo = [
     color: "#e65100",
     description: "Professional work experience",
     quadrant: "Northwest",
-    ids: ["I-1", "I-2", "I-3", "I-4"],
+    ids: ["I-4", "I-2", "I-1", "I-3"],
   },
   {
     name: "Aero Atoll",
@@ -473,7 +413,7 @@ export const sectorInfo = [
     color: "#6a1b9a",
     description: "Software & AI projects",
     quadrant: "Southeast",
-    ids: ["P-6", "P-7", "P-8", "P-9", "P-12", "P-13"],
+    ids: ["P-9", "P-12", "P-13"],
   },
 ];
 

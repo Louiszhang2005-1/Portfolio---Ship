@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Matter from "matter-js";
 import {
   missions, Mission, SPAWN_POSITION, WORLD_BOUNDS, COLLISION_RADIUS,
-  collectibles, fogZones, FOG_REVEAL_RADIUS, hazardZones,
+  collectibles, fogZones, FOG_REVEAL_RADIUS, hazardZones, barrels,
 } from "@/data/missions";
 import { calculateGravityForce, predictTrajectory, Vec2, MAX_DISTANCE } from "@/systems/GravitySystem";
 import {
@@ -17,14 +17,17 @@ import {
 
 /* ─── Constants ─── */
 const SHIP_MASS = 8;
-const SHIP_FRICTION_AIR = 0.016;
-const THRUST_FORCE = 0.006;
-const REVERSE_FORCE = 0.0035;
+const SHIP_FRICTION_AIR = 0.019;
+const THRUST_FORCE = 0.0052;
+const REVERSE_FORCE = 0.003;
+const MAX_SHIP_SPEED = 5.1;
 const TURN_TORQUE = 0.06;
 const CAMERA_LERP = 0.09;
 const STORAGE_KEY = "isle-commander-visited";
 const STORAGE_KEY_COLLECTED = "isle-commander-collected";
 const COLLECT_RADIUS = 70;
+const ISLAND_BUMPER_RADIUS = 76;
+const BARREL_BUMPER_RADIUS = 28;
 
 /* ─── Pre-computed mission color cache (computed once at module load) ─── */
 const missionColorCache: Record<string, { r: number; g: number; b: number }> = {};
@@ -254,8 +257,36 @@ export function useMatterEngine(): MatterEngine {
       Matter.Bodies.rectangle(WORLD_BOUNDS + wallThickness / 2, 0, wallThickness, WORLD_BOUNDS * 3, { isStatic: true, label: "wall", restitution: 0.5 }),
     ];
 
+    const islandBumpers = missions
+      .filter((mission) => mission.status !== "locked")
+      .map((mission) => Matter.Bodies.circle(
+        mission.position.x,
+        mission.position.y,
+        ISLAND_BUMPER_RADIUS,
+        {
+          isStatic: true,
+          label: `island:${mission.id}`,
+          restitution: 0.62,
+          friction: 0.05,
+          frictionStatic: 0.05,
+        },
+      ));
+
+    const barrelBumpers = barrels.map((barrel) => Matter.Bodies.circle(
+      barrel.position.x,
+      barrel.position.y,
+      BARREL_BUMPER_RADIUS,
+      {
+        isStatic: true,
+        label: `barrel:${barrel.id}`,
+        restitution: 0.82,
+        friction: 0.02,
+        frictionStatic: 0.02,
+      },
+    ));
+
     // Add all bodies to world
-    Matter.Composite.add(engine.world, [ship, ...walls]);
+    Matter.Composite.add(engine.world, [ship, ...walls, ...islandBumpers, ...barrelBumpers]);
 
     // ── Collision Handler ──
     Matter.Events.on(engine, "collisionStart", (event) => {
@@ -266,15 +297,24 @@ export function useMatterEngine(): MatterEngine {
         const other = pair.bodyA === ship ? pair.bodyB : pair.bodyA;
         const collision = pair.collision;
 
-        if (other.label === "wall") {
+        if (other.label === "wall" || other.label.startsWith("island:") || other.label.startsWith("barrel:")) {
           // Boundary collision — shake + stress
-          shakeRef.current.intensity = 0.8;
+          const speed = Math.sqrt(ship.velocity.x ** 2 + ship.velocity.y ** 2);
+          const isBarrel = other.label.startsWith("barrel:");
+          const isIsland = other.label.startsWith("island:");
+          shakeRef.current.intensity = other.label === "wall" ? 0.8 : isBarrel ? 0.48 : 0.34;
           stressRef.current = applyImpact(
             stressRef.current,
             { x: ship.velocity.x, y: ship.velocity.y },
             collision.normal,
             ship.mass,
           );
+          if (isBarrel || (isIsland && speed > 1.15)) {
+            Matter.Body.applyForce(ship, ship.position, {
+              x: collision.normal.x * (isBarrel ? 0.032 : 0.018),
+              y: collision.normal.y * (isBarrel ? 0.032 : 0.018),
+            });
+          }
           if (boundaryHitCooldownRef.current === 0) {
             boundaryHitCooldownRef.current = 120;
             setBoatSquash(true);
@@ -361,8 +401,23 @@ export function useMatterEngine(): MatterEngine {
       // ── Step Matter.js engine ──
       Matter.Engine.update(engine, 1000 / 60);
 
+      const currentSpeed = Math.sqrt(ship.velocity.x ** 2 + ship.velocity.y ** 2);
+      if (currentSpeed > MAX_SHIP_SPEED) {
+        const speedScale = MAX_SHIP_SPEED / currentSpeed;
+        Matter.Body.setVelocity(ship, {
+          x: ship.velocity.x * speedScale,
+          y: ship.velocity.y * speedScale,
+        });
+      }
+
       // ── Tick stress ──
       const dockedAtPort = distance(ship.position, SPAWN_POSITION) < 120;
+      if (dockedAtPort && Math.sqrt(ship.velocity.x ** 2 + ship.velocity.y ** 2) < 2.4) {
+        Matter.Body.setVelocity(ship, {
+          x: ship.velocity.x * 0.94,
+          y: ship.velocity.y * 0.94,
+        });
+      }
       stressRef.current = tickStress(stressRef.current, dockedAtPort);
 
       // ── Tick hazards ──
@@ -422,15 +477,15 @@ export function useMatterEngine(): MatterEngine {
 
           // Draw force fields: proximity-sensor activated
           const time = frameCount.current * 0.03;
-          const FIELD_ACTIVATE_DIST = 700;
-          const FIELD_FULL_DIST = 350;
+          const FIELD_ACTIVATE_DIST = 900;
+          const FIELD_FULL_DIST = 460;
 
           for (const m of missions) {
             if (m.status === "locked") continue;
 
             const screenX = m.position.x + cx;
             const screenY = m.position.y + cy;
-            const fieldR = (m.fieldRadius ?? 250) * 1.4;
+            const fieldR = (m.fieldRadius ?? 250) * 1.65;
 
             if (screenX < -fieldR - 50 || screenX > w + fieldR + 50 || screenY < -fieldR - 50 || screenY > h + fieldR + 50) continue;
 
