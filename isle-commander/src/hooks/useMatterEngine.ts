@@ -67,6 +67,7 @@ export interface MatterEngine {
   openBlueprint: () => void;
   closeBlueprint: () => void;
   navigateToIsland: (mission: Mission) => void;
+  returnHome: () => void;
   mapOpen: boolean;
   toggleMap: () => void;
   closeMap: () => void;
@@ -173,6 +174,9 @@ export function useMatterEngine(): MatterEngine {
   const thrustLevelRef = useRef(0);
   const boundaryHitCooldownRef = useRef(0);
   const trajectoryRef = useRef<Vec2[]>([]);
+  const nodeDataRef = useRef(missions.map(m => ({
+    x: m.position.x, y: m.position.y, gravityMass: m.gravityMass,
+  })));
 
   // Parallax constants — scaled for WORLD_BOUNDS=2000
   const WORLD_SIZE = 5000;
@@ -185,6 +189,7 @@ export function useMatterEngine(): MatterEngine {
   useEffect(() => {
     const storedVisited = loadVisited();
     if (storedVisited.size > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisitedIds(storedVisited);
       visitedRef.current = storedVisited;
     }
@@ -378,10 +383,7 @@ export function useMatterEngine(): MatterEngine {
       }
 
       // ── Apply gravity ──
-      const nodeData = missions.map(m => ({
-        x: m.position.x, y: m.position.y, gravityMass: m.gravityMass,
-      }));
-      const gravForce = calculateGravityForce(ship, nodeData);
+      const gravForce = calculateGravityForce(ship, nodeDataRef.current);
       Matter.Body.applyForce(ship, ship.position, gravForce);
 
       // ── Apply hazard forces ──
@@ -719,7 +721,7 @@ export function useMatterEngine(): MatterEngine {
 
       // ── HUD updates (throttled to every 10 frames) ──
       frameCount.current++;
-      if (frameCount.current % 10 === 0) {
+      if (frameCount.current % 16 === 0) {
         const speed = Math.sqrt(ship.velocity.x ** 2 + ship.velocity.y ** 2);
         setHudSpeed(speed);
         setHudHeading(normalizeAngle((ship.angle * 180) / Math.PI));
@@ -811,6 +813,17 @@ export function useMatterEngine(): MatterEngine {
     autoNavTarget.current = { ...mission.position };
   }, []);
 
+  const returnHome = useCallback(() => {
+    autoNavTarget.current = { ...SPAWN_POSITION };
+    setMapOpen(false);
+    setPortShopOpen(false);
+    if (gameStateRef.current === "inspecting") {
+      setInspectedIsland(null);
+      setGameState("sailing");
+      gameStateRef.current = "sailing";
+    }
+  }, []);
+
   const toggleMap = useCallback(() => setMapOpen(v => !v), []);
   const closeMap = useCallback(() => setMapOpen(false), []);
 
@@ -888,6 +901,7 @@ export function useMatterEngine(): MatterEngine {
     openBlueprint,
     closeBlueprint,
     navigateToIsland,
+    returnHome,
     mapOpen,
     toggleMap,
     closeMap,

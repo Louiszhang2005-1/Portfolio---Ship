@@ -12,6 +12,12 @@ export interface AssemblyPart {
   targetAngle?: number;
 }
 
+export interface MissionResource {
+  label: string;
+  href: string;
+  icon?: string;
+}
+
 export interface Mission {
   id: string;
   sector: string;
@@ -31,8 +37,11 @@ export interface Mission {
   color: string;
   logo?: string;
   image?: string;
+  images?: string[];
+  imageLabels?: string[];
   github?: string;
   demo?: string;
+  resources?: MissionResource[];
   /* Physics properties */
   gravityMass: number;         // Gravitational pull strength (400-1200)
   fieldType: "typhoon" | "gravity";  // Visual field effect type
@@ -61,6 +70,7 @@ export const missions: Mission[] = [
     emoji: "💧",
     color: "#0277bd",
     logo: "/logo/city-of-montreal.gif",
+    image: "/logo/city-of-montreal.gif",
     gravityMass: 600,
     fieldType: "typhoon",
     fieldRadius: 220,
@@ -139,8 +149,8 @@ export const missions: Mission[] = [
     id: "P-1",
     sector: "Aero Atoll",
     sectorColor: "#b8860b",
-    title: "CSA Lunar LEAP",
-    subtitle: "PM & Systems Integrator · CSA LEAP · Jan–May 2025 · Polytechnique Montréal",
+    title: "CSA Transport System",
+    subtitle: "CSA LEAP · Vegetable Collection Transport System · Jan–May 2025 · Polytechnique Montréal",
     status: "active",
     landmark: "A miniature moon-base with a moving lunar wagon",
     position: { x: 1300, y: -400 },
@@ -148,7 +158,7 @@ export const missions: Mission[] = [
     chronoOrder: 202501,
     skills: ["CATIA V6", "Fusion 360", "GD&T", "MS Project", "Cold Welding", "Systems Integration", "FEA", "Arduino", "Raspberry Pi Pico"],
     details:
-      "PM & Systems Integrator for the Canadian Space Agency Lunar Exploration Accelerator Program (LEAP) — OASIS Mission (Jan–May 2025, Polytechnique Montréal). Directed end-to-end design of a 3.1m telescopic lunar produce-transport tube (Ø540mm, 3080mm deployed length) fully compliant with CSA performance and safety standards. Managed 50+ part interfaces, achieved a 12% system mass reduction while sustaining a 2.5× structural safety factor. Ran thermal FEA over the 14-day lunar night cycle and validated zero mechanical interference across the full telescopic deployment sweep. Developed the rail-guided transport wagon's control logic on an Arduino microcontroller — ensuring precision positioning along the telescopic support tube. Designed and programmed a Raspberry Pi Pico–driven belt conveyor for seamless vegetable transfer from lunar greenhouse to habitat module. Led physical integration: AL-6061 machining, MLI fabrication, PCB prototyping, wiring harnesses, and cold-welding of tab-to-tube joints.",
+      "Design and development of a transport system for vegetable collection for the Canadian Space Agency, built as part of the Lunar Exploration Accelerator Program (LEAP) at Polytechnique Montréal (Jan–May 2025). Served as Project Manager and Systems Integrator, directing end-to-end design and integration of a lunar produce-transport prototype compliant with CSA performance and safety standards. Coordinated cross-disciplinary work, milestones, and deliverables using Microsoft Project. Built detailed 3D assemblies and ran kinematic/structural analysis in CATIA and Fusion 360 to validate motion profiles and load-bearing capacity. Developed the rail-guided transport wagon's Arduino control logic for precise positioning along the telescopic support tube, and designed/programmed a Raspberry Pi Pico belt conveyor for vegetable transfer from lunar greenhouse to habitat module.",
     emoji: "🌕",
     color: "#b8860b",
     gravityMass: 850,
@@ -162,8 +172,25 @@ export const missions: Mission[] = [
       { id: "leap-wagon", label: "Arduino Wagon", shape: "rect", width: 32, height: 22, mass: 6, color: "#c62828", targetX: -35, targetY: 0 },
       { id: "leap-conveyor", label: "Pi Pico Conveyor", shape: "rect", width: 30, height: 14, mass: 4, color: "#1565c0", targetX: 35, targetY: 0 },
     ],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBfmEpezBSpneFvCrYKhOLUOseL8Ykp1jo-HSG-ffLWpXFUDPcJaLNQ_yYG5K3rrQojomG93egnxnwooCUeOcPCLWPOTN3DCgnuB1cKbCeyo00IDUBjs5tK3QD_526_Tv0wWlf_J9c26MbyCm2M9Bh0lHMTaYyyp_lR2bOctqYMSHKc0imzdeQ5FArd6MJgX1SS1NDA5WuXGr8-BMg81vmKL76Uzzftusbi3MNmNr5KKskCa3NgMBifjJq1unU1ixty6_658_OlN05p",
+    image: "/media/csa/prototype-overview.jpg",
+    images: [
+      "/media/csa/prototype-overview.jpg",
+      "/media/csa/tube-interior.jpg",
+      "/media/csa/section-drawing.jpg",
+      "/media/csa/isometric-drawing-bom.jpg",
+      "/media/csa/isometric-view.webp",
+      "/media/csa/section-view.webp",
+      "/media/csa/section-view-copy.jpg",
+    ],
+    imageLabels: [
+      "Prototype Overview",
+      "Tube Interior",
+      "Section Drawing",
+      "BOM Drawing",
+      "CAD Isometric",
+      "CAD Section",
+      "CAD Section Copy",
+    ],
   },
   {
     id: "P-2",
@@ -191,14 +218,19 @@ export const missions: Mission[] = [
       { id: "pump-piston", label: "Piston (×9)", shape: "rect", width: 10, height: 32, mass: 4, color: "#c0c0c0", targetX: -20, targetY: -5 },
       { id: "pump-slipper", label: "Patin (×9)", shape: "circle", width: 14, height: 14, mass: 2, color: "#d4a017", targetX: 20, targetY: -30 },
     ],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBfmEpezBSpneFvCrYKhOLUOseL8Ykp1jo-HSG-ffLWpXFUDPcJaLNQ_yYG5K3rrQojomG93egnxnwooCUeOcPCLWPOTN3DCgnuB1cKbCeyo00IDUBjs5tK3QD_526_Tv0wWlf_J9c26MbyCm2M9Bh0lHMTaYyyp_lR2bOctqYMSHKc0imzdeQ5FArd6MJgX1SS1NDA5WuXGr8-BMg81vmKL76Uzzftusbi3MNmNr5KKskCa3NgMBifjJq1unU1ixty6_658_OlN05p",
+    image: "/media/axial-piston-pump/exploded-drawing.jpg",
+    images: [
+      "/media/axial-piston-pump/exploded-drawing.jpg",
+    ],
+    imageLabels: [
+      "Exploded Drawing",
+    ],
   },
   {
     id: "P-3",
     sector: "Aero Atoll",
     sectorColor: "#b8860b",
-    title: "Reforestation Robot",
+    title: "Autonomous Reforestation Robot",
     subtitle: "RoboHacks Feb 2025 · Unexpected Expedition Award · 5th Overall",
     status: "active",
     landmark: "A tiny forest with a robot planting low-poly trees",
@@ -207,7 +239,7 @@ export const missions: Mission[] = [
     chronoOrder: 202502,
     skills: ["Arduino C++", "IR Sensors", "Color Sensor", "DC Motors", "Recycled Materials"],
     details:
-      "🏆 Winner — Unexpected Expedition Award · 5th Place Overall at RoboHacks (Feb 2025). Built a fully autonomous seed-planting robot in 24 hours using recycled materials — cardboard chassis, plastic bottles, and a paper-engineered seed dispenser. Coded the full navigation and dispensing sequence in C++ on Arduino: two IR sensors fused with a color sensor for line-following, servo-actuated paper dispenser for timed seed placement. Wired all electronics on a breadboard from scratch under competition conditions.",
+      "🏆 Winner of the Unexpected Expedition Award and 5th place finisher overall at RoboHacks (Feb 2025). Developed an autonomous seed-planting robot using C++ and the Arduino framework. Integrated two infrared sensors and a color sensor for precise navigation along a designated black line. Engineered a custom motorized seed dispenser for accurate seed placement, then designed and assembled the complete system independently for presentation to industry judges.",
     emoji: "🌱",
     color: "#2e7d32",
     gravityMass: 650,
@@ -222,8 +254,15 @@ export const missions: Mission[] = [
       { id: "robo-ir", label: "IR Sensor", shape: "circle", width: 14, height: 14, mass: 1, color: "#ff5722", targetX: -15, targetY: -25 },
       { id: "robo-color", label: "Color Sensor", shape: "circle", width: 14, height: 14, mass: 1, color: "#00d4ff", targetX: 15, targetY: -25 },
     ],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDAS80X_XNEuUFS6k-WwWNK4ujFPPuUxPpWvmTVpU1JR5SivSd5oUG2JcVNgHI4epz7XEJI6N7eCpY_5koJUANuAI1BYhptkTPhdi5UGO2lM2yHA1--6_Zdhkuwaf4AXh47aYn5TOW2B8af31QajqbXwz4Ldn2XPUjvQPK0SasCQYVwEJls5ZWv-YsDYabLJ6PaUZtolG1ufVsJARGvsPWji9-J_dMGuf0kpNNEYucYBsS8AG3SpRwrHKSZrvL4alOKLEcgHbwa7a7w",
+    image: "/media/robohacks/robot-held.jpg",
+    images: [
+      "/media/robohacks/robot-held.jpg",
+      "/media/robohacks/robot-top.jpg",
+    ],
+    imageLabels: [
+      "Prototype In Hand",
+      "Top View Wiring",
+    ],
   },
 
   {
@@ -237,15 +276,17 @@ export const missions: Mission[] = [
     position: { x: 400, y: -1200 },
     date: "Jan 2026",
     chronoOrder: 202601,
-    skills: ["SolidWorks", "Blender", "React", "Python", "AI API", "3D Modeling", "CAD Integration"],
+    skills: ["React", "SolidWorks", "Blender", "Python", "AI API", "CAD Integration"],
     details:
-      "Built at McHacks 13 (Jan 2026). As mechanical engineering students who have spent countless hours scrolling Glassdoor and LinkedIn preparing for technical interviews, we built MechPrep — an interactive interview prep platform tailored for mechanical and aerospace engineering students. Designed and modeled 3D components in SolidWorks and Blender, then integrated the CAD models into a React + Python web app to make them interactive and educational. Integrated an AI API to generate and evaluate interview questions. Key challenges: wiring the AI API into the project architecture and embedding interactive CAD models into the browser. Next steps: expand the question bank across more companies and offer a white-label tool to help companies generate their own technical interview questions.",
+      "Built at McHacks 13 (Jan 2026). As mechanical engineering students who spent countless hours scrolling Glassdoor and LinkedIn for interview prep, we created MechPrep: a platform to help mechanical and aerospace students prepare for interviews. We built 3D models in SolidWorks and Blender, then used React and Python to integrate the CAD assets into an interactive experience. The hardest parts were integrating the AI API and bringing CAD into the app. Next steps include adding more questions from different companies and helping companies generate interview questions for applicants.",
     emoji: "🔧",
     color: "#5c6bc0",
     gravityMass: 650,
     fieldType: "gravity",
     fieldRadius: 240,
     demo: "https://devpost.com/software/mechie",
+    image:
+      "https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/004/179/500/datas/original.png",
     assemblyParts: [
       { id: "mech-cad", label: "CAD Model", shape: "rect", width: 60, height: 40, mass: 8, color: "#8B8682", targetX: 0, targetY: 0 },
       { id: "mech-gear", label: "Gear Component", shape: "circle", width: 30, height: 30, mass: 5, color: "#5c6bc0", targetX: -30, targetY: 15 },
@@ -261,16 +302,16 @@ export const missions: Mission[] = [
     id: "P-4",
     sector: "Robotics & IoT",
     sectorColor: "#c62828",
-    title: "ResQ-Link",
+    title: "ResQ - Link",
     subtitle: "UpStart 2026 · Digital System for Disaster Management",
     status: "active",
     landmark: "A medical station with a giant glowing NFC wristband",
     position: { x: -1300, y: 400 },
     date: "Feb 2026",
     chronoOrder: 202602,
-    skills: ["SolidWorks", "Passive NFC", "IP68 Design", "PCB Prototyping", "Next.js", "Medical Design", "Systems Architecture"],
+    skills: ["SolidWorks", "React", "Passive NFC", "Offline-Mesh Sync", "Medical Device CAD"],
     details:
-      "Built at UpStart 2026 (Feb 2026) as part of a multidisciplinary team from Polytechnique Montréal. In Montreal, analog paper triage tags contribute to a 30% triage error rate, $1.7B in annual malpractice losses, and 10.5-hour average ER wait times. ResQ-Link replaces paper tags with a zero-power passive NFC bracelet: inductive copper coil (no battery required), passive NFC chip, IP68 medical-grade silicone band with translucent overmolded seal. Bundled with the SmartTriage companion dashboard — a full Command Center featuring real-time bracelet location maps, tag management (Morgue/Immediate/Delayed/Minor), registered staff tracking, and an offline-mesh data sync protocol so data reaches the hospital even when cellular fails. Business model: hardware 'Blade' at $1.50/unit (80% gross margin at scale) + software 'Razor' SaaS at $10k–$50k/facility/year. Targeting $750k seed round for MUHC 5,000-unit pilot, Health Canada Class I/II certification, and Quebec 'Buy Local' procurement priority.",
+      "Built at UpStart 2026 (Feb 2026). ResQ-Link is a multidisciplinary disaster-response system inspired by the information blackout caused by analog paper triage tags during mass casualty events. As a team of Mechanical, Electrical, and Software engineers from Polytechnique Montréal, we designed a ready-to-build system around three pillars: a ruggedized IP68-rated medical silicone band to protect internal circuitry, a passive NFC induction architecture that requires zero batteries, and a Command Center dashboard using an Offline-Mesh Data Sync protocol so data can reach hospitals even when cellular networks fail.",
     emoji: "🏥",
     color: "#c62828",
     gravityMass: 600,
@@ -284,7 +325,12 @@ export const missions: Mission[] = [
       { id: "resq-seal", label: "IP68 Overmold Seal", shape: "rect", width: 36, height: 28, mass: 2, color: "rgba(180,220,255,0.6)", targetX: 0, targetY: 0 },
     ],
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDAS80X_XNEuUFS6k-WwWNK4ujFPPuUxPpWvmTVpU1JR5SivSd5oUG2JcVNgHI4epz7XEJI6N7eCpY_5koJUANuAI1BYhptkTPhdi5UGO2lM2yHA1--6_Zdhkuwaf4AXh47aYn5TOW2B8af31QajqbXwz4Ldn2XPUjvQPK0SasCQYVwEJls5ZWv-YsDYabLJ6PaUZtolG1ufVsJARGvsPWji9-J_dMGuf0kpNNEYucYBsS8AG3SpRwrHKSZrvL4alOKLEcgHbwa7a7w",
+      "https://opengraph.githubassets.com/isle-commander/Louiszhang2005-1/ResQ---Link",
+    resources: [
+      { label: "Pitch Deck", href: "/media/resq-link/pitch-deck.pdf", icon: "slideshow" },
+      { label: "Drawings/Dashboard", href: "/media/resq-link/drawings-dashboard.pdf", icon: "dashboard" },
+      { label: "Business Model", href: "/media/resq-link/business-model-canvas.pdf", icon: "business_center" },
+    ],
   },
   {
     id: "P-5",
@@ -299,7 +345,7 @@ export const missions: Mission[] = [
     chronoOrder: 202601,
     skills: ["Python", "C++", "mmWave Radar", "ESP32 / FreeRTOS", "ROS 2", "MongoDB", "Gemini AI", "ElevenLabs", "OpenWRT"],
     details:
-      "🏆 Winner at ConUHacks X — Best Use of ElevenLabs (Jan 2026). Co-founded an on-premises AI nurse assistant for Quebec long-term care facilities (CHSLDs). Falls among seniors (65+) have risen 47% between 2008–2019 — Nursie closes the gap between unwitnessed falls and delayed staff response. What it does: (1) detects falls using mmWave radar (IWR6843) fused with a floor vibration mat; (2) tracks room context via magnetic door sensor + PIR presence/occupancy node on ESP32/FreeRTOS; (3) monitors vital signs via smartwatch integration; (4) sends immediate alerts — phone call + dashboard push — to staff on detection; (5) builds a resident profile in MongoDB over time to flag unusual behavior (e.g. leaving the apartment at night); (6) provides a voice interface for residents via ElevenLabs for questions, appointment reminders, and medication prompts. Design principles: fast reliable detection over fancy features; 3× sensor redundancy to reduce false positives (radar + vibration mat + wearable fused for confidence scoring); privacy by architecture — all data stays on the facility's local OpenWRT LAN, no cameras, no cloud.",
+      "🏆 Best Use of ElevenLabs at ConUHacks X (Jan 2026). Nursie detects falls using mmWave radar and a floor vibration mat, tracks context with door-open and presence/occupancy sensing, monitors vital signs via a smartwatch, and sends immediate emergency alerts through phone calls and a dashboard. It builds a resident profile over time in MongoDB to flag unusual behavior such as leaving the apartment at night, and provides a voice interface for residents for questions, appointment reminders, and medication prompts. Design principles: fast reliable detection over fancy features, sensor redundancy to reduce false positives, and privacy by architecture with no always-streaming camera, no raw data leaving the network by default, and local processing wherever possible.",
     demo: "https://devpost.com/software/nursie",
     emoji: "🏆",
     color: "#1565c0",
@@ -307,8 +353,21 @@ export const missions: Mission[] = [
     fieldType: "typhoon",
     fieldRadius: 250,
     github: "https://github.com/Louiszhang2005-1",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDAS80X_XNEuUFS6k-WwWNK4ujFPPuUxPpWvmTVpU1JR5SivSd5oUG2JcVNgHI4epz7XEJI6N7eCpY_5koJUANuAI1BYhptkTPhdi5UGO2lM2yHA1--6_Zdhkuwaf4AXh47aYn5TOW2B8af31QajqbXwz4Ldn2XPUjvQPK0SasCQYVwEJls5ZWv-YsDYabLJ6PaUZtolG1ufVsJARGvsPWji9-J_dMGuf0kpNNEYucYBsS8AG3SpRwrHKSZrvL4alOKLEcgHbwa7a7w",
+    image: "/media/nursie/dashboard.png",
+    images: [
+      "/media/nursie/dashboard.png",
+      "/media/nursie/door-sensor.jpg",
+      "/media/nursie/door-sensor-part-2.jpg",
+      "/media/nursie/fall-sensor.jpg",
+      "/media/nursie/lidar-movement.jpg",
+    ],
+    imageLabels: [
+      "Dashboard",
+      "Door Sensor Node",
+      "Door Sensor Mount",
+      "Fall Sensor",
+      "Movement Radar",
+    ],
   },
   // ── Robotics & IoT: placeholder (locked) ─────────
   {
@@ -338,8 +397,8 @@ export const missions: Mission[] = [
     id: "P-12",
     sector: "Code Cove",
     sectorColor: "#6a1b9a",
-    title: "LazyCare",
-    subtitle: "UdemHacks · Mar 2025 · AI Health Assistant",
+    title: "Lazycare",
+    subtitle: "AI Health Assistant · UdemHacks · Mar 2025",
     status: "active",
     landmark: "A glowing AI clinic with floating chat bubbles and health charts",
     position: { x: 950, y: 1200 },
@@ -347,20 +406,21 @@ export const missions: Mission[] = [
     chronoOrder: 202503,
     skills: ["Next.js", "Node.js", "Express", "Python", "FastAPI", "Fine-tuning", "TinyLlama", "AI"],
     details:
-      "Built at UdemHacks (Mar 2025). LazyCare is an AI health assistant that provides personalized health recommendations via text-based interactions. Backend stack: Next.js frontend, Node.js/Express middleware, and a Python FastAPI service running a fine-tuned TinyLlama model for domain-specific health analysis. Fine-tuning allows the model to give more accurate, context-aware answers than a vanilla LLM. Features: personalized profile management, AI chat interface, and full conversation history so the assistant learns your context over time.",
+      "Built at UdemHacks (Mar 2025). LazyCare is an AI health assistant that provides personalized recommendations through text-based interactions. Built with Next.js, Node.js/Express, and Python/FastAPI, it features a personalized trained bot using fine-tuning to provide more accurate answers. It uses TinyLlama for health analysis and includes profile management, AI chat, and conversation history.",
     emoji: "💊",
     color: "#00897b",
     gravityMass: 550,
     fieldType: "gravity",
     fieldRadius: 220,
     github: "https://github.com/Karencheenn/LazyCare",
+    image: "https://opengraph.githubassets.com/isle-commander/Karencheenn/LazyCare",
   },
 
   {
     id: "P-13",
     sector: "Code Cove",
     sectorColor: "#6a1b9a",
-    title: "Interview Assistant",
+    title: "Virtual Interviewing Assistant",
     subtitle: "Brebeuf Hacks · Jan 2024 · Voice AI",
     status: "active",
     landmark: "A glowing interview booth with a floating AI avatar and speech waves",
@@ -369,21 +429,22 @@ export const missions: Mission[] = [
     chronoOrder: 202401,
     skills: ["Python", "NLP", "Voice AI", "API Integration", "Natural Language Processing"],
     details:
-      "Built at Brebeuf Hacks (Jan 2024) in a team of 3. A voice-based virtual interviewing assistant designed to help computer science students prepare for technical interviews. The assistant presents personalized interview questions verbally, listens to the interviewee's response, and evaluates the answer using natural language processing algorithms. Developed with Python and integrated an AI/NLP API to power the intelligent question-and-answer pipeline. Features a user-friendly voice interface so students can practice in a realistic spoken-word format rather than typing.",
+      "Built at Brebeuf Hacks (Jan 2024) in a team of 3 to help computer science majors prepare for interviews. The project is a voice-based virtual assistant that gives interviewees potential interview questions and evaluates their answers. Developed with Python and API integration, it offers personalized interview guidance and a user-friendly interface powered by natural language processing algorithms.",
     emoji: "🎤",
     color: "#7b1fa2",
     gravityMass: 500,
     fieldType: "gravity",
     fieldRadius: 210,
     github: "https://github.com/Louiszhang2005-1/Virtual_interviewing_assistant",
+    image: "https://opengraph.githubassets.com/isle-commander/Louiszhang2005-1/Virtual_interviewing_assistant",
   },
 
   {
     id: "P-9",
     sector: "Code Cove",
     sectorColor: "#6a1b9a",
-    title: "CRM Outreach Tool",
-    subtitle: "Accenture · AOTC 2026 · Mar–Apr 2026",
+    title: "Fully Integrated CRM Outreach Tool",
+    subtitle: "AOTC 2026 · Accenture · Mar–Apr 2026",
     status: "active",
     landmark: "A data-funnel temple with AI circuits",
     position: { x: 1650, y: 1200 },
@@ -391,7 +452,7 @@ export const missions: Mission[] = [
     chronoOrder: 202603,
     skills: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Gemini AI", "Resend", "Apollo.io", "Google Sheets API"],
     details:
-      "Fully integrated CRM outreach tool built for a Montreal urban agriculture cooperative (La Centrale Agricole), developed as part of Accenture's AOTC 2026 program. Manages contact lists across 3 audience segments (corporate, schools, institutions & media). Uses Google Gemini AI to generate personalized cold emails tailored to each contact's name, title, and organization — then sends them directly through the app. Tracks every contact through the full sales pipeline, syncs all data to Google Sheets in real time, and centralizes booking requests with auto-calculated revenue estimates. Team can accept, refuse, or cancel reservations — triggering a professional email to the client instantly. Total running cost: ~$0/month on free tiers.",
+      "Developed a complete CRM tool for a Montreal urban agriculture cooperative as part of AOTC 2026 with Accenture. The app automates outreach, manages client relationships, and tracks bookings end to end. It manages contact lists across 3 audience segments (corporate, schools, institutions & media), uses Google Gemini AI to generate personalized cold emails tailored to each contact's name, title, and organization, sends emails directly through the app, tracks every contact through the full sales pipeline, syncs all data to Google Sheets in real time, centralizes booking requests, calculates estimated revenue per visit automatically, and lets the team accept, refuse, or cancel reservations with instant professional client emails. Total cost to run: ~$0/month on free tiers.",
     emoji: "🤖",
     color: "#ad1457",
     gravityMass: 550,
@@ -400,7 +461,7 @@ export const missions: Mission[] = [
     github: "https://github.com/Louiszhang2005-1/Fully-Integrated-CRM-Tool",
     demo: "https://www.youtube.com/watch?v=TVuFauDyA00",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAq3y0pe5-zj445NQYKmzbJNwSt6pwKm-RRaSroWdOsq0I9WvDU4tlIf_le6clLEAU1EU_s99pamo_RefOqMxhNv1gYMTs8tPSds7Jkb4ZRhxpEU9UQElEzVJSAoqViv4qiKxxL8YG9QR_aSkWObExq5swckGUTYd52SXI-msGM0W3mwkQaAm_mq0ahm8uaF08K-nIl5jUrIwBV32yVovAyJQHnlDfbkAO7aB-NtTFoGg_DNNFBe_PUARobX_wFyaL9hpiLkuNQrBNF",
+      "https://img.youtube.com/vi/TVuFauDyA00/maxresdefault.jpg",
   },
 ];
 

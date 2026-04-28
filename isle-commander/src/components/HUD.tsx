@@ -17,6 +17,7 @@ interface HUDProps {
   nearestGravityAngle: number;
   onIslandClick: (mission: Mission) => void;
   onToggleMap: () => void;
+  onReturnHome: () => void;
   score: number;
   collectedItems: Set<string>;
   isHullCritical: boolean;
@@ -126,7 +127,7 @@ function CircularGauge({ value, label, color, icon, warning }: {
 
 export default function HUD({
   visitedCount, speed, boilerPressure, stressState, nearbyIsland, gameState, boatPosition, boatHeading,
-  nearestGravityAngle, onIslandClick, onToggleMap, score, collectedItems, isHullCritical: hullCrit, isBoilerCritical: boilerCrit, isDocked,
+  nearestGravityAngle, onIslandClick, onToggleMap, onReturnHome, score, collectedItems, isHullCritical: hullCrit, isBoilerCritical: boilerCrit, isDocked,
 }: HUDProps) {
   const totalActive = missions.filter((m) => m.status === "active").length;
   const scorePercent = MAX_COLLECTIBLE_SCORE > 0 ? (score / MAX_COLLECTIBLE_SCORE) * 100 : 0;
@@ -248,6 +249,10 @@ export default function HUD({
             <span className="text-base">🗺️</span>
             <span className="font-label font-bold text-white text-xs uppercase tracking-wider hidden sm:inline">Map</span>
             <kbd className="hidden md:inline text-[8px] font-label text-cyan-200/60 bg-black/20 px-1 rounded">M</kbd>
+          </button>
+          <button onClick={onReturnHome} className="bg-emerald-500/35 hover:bg-emerald-500/55 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2 border border-emerald-200/30 transition-colors cursor-pointer">
+            <span className="material-symbols-outlined icon-lock text-[17px] text-emerald-100">home</span>
+            <span className="font-label font-bold text-white text-xs uppercase tracking-wider hidden sm:inline">Home</span>
           </button>
         </motion.div>
       </header>

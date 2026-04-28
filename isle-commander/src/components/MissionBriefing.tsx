@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import HollowAvatar from "./HollowAvatar";
 import SprocketAvatar from "./SprocketAvatar";
 
 type Line = { text: string; color?: string; indent?: boolean; tag?: string; tagColor?: string };
@@ -35,7 +34,7 @@ const PART2_LINES: Line[] = [
   { text: "CAD, structural layouts, FEA validation, and shipboard subsystem integration.", color: "rgba(199,232,255,0.76)", indent: true },
   { text: "> Tesla", tag: "Cell Engineering", tagColor: "#dc2626" },
   { text: "Battery manufacturing, automation, process optimization, and production thinking.", color: "rgba(199,232,255,0.76)", indent: true },
-  { text: "> CSA Lunar LEAP", tag: "Systems", tagColor: "#b45309" },
+  { text: "> CSA Transport System", tag: "Systems", tagColor: "#b45309" },
   { text: "Lunar transport prototype, project management, controls, thermal and structural validation.", color: "rgba(199,232,255,0.76)", indent: true },
   { text: "> Rapid builds", tag: "Mechatronics", tagColor: "#059669" },
   { text: "Robots, NFC disaster response hardware, AI tools, dashboards, and prototypes.", color: "rgba(199,232,255,0.76)", indent: true },
@@ -204,6 +203,12 @@ export default function MissionBriefing() {
   }, []);
 
   useEffect(() => {
+    if (!phaseReady || phase === "booting" || phase === "outro" || phase === "closed") return;
+    const t = setTimeout(() => advance(), phase === "part3" ? 1400 : 1100);
+    return () => clearTimeout(t);
+  }, [advance, phase, phaseReady]);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (phase === "closed") return;
       if (e.key === "Escape") dismiss();
@@ -279,6 +284,15 @@ export default function MissionBriefing() {
                       }}
                     />
                   ))}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dismiss();
+                    }}
+                    className="ml-3 rounded-md border border-white/12 bg-white/[0.06] px-3 py-1 font-label text-[9px] font-black uppercase tracking-[0.16em] text-cyan-50/70 transition-colors hover:bg-cyan-200/12 hover:text-white"
+                  >
+                    Skip Intro
+                  </button>
                 </div>
               </div>
 
@@ -286,7 +300,7 @@ export default function MissionBriefing() {
                 <div className="relative overflow-hidden rounded-md border border-cyan-200/16 bg-cyan-200/[0.045] p-4">
                   <div className="absolute left-1/2 top-8 h-44 w-44 -translate-x-1/2 rounded-full border border-cyan-100/12 launch-radar" />
                   <div className="relative flex flex-col items-center">
-                    <HollowAvatar size={146} />
+                    <SprocketAvatar size={146} />
                     <h1 className="mt-4 text-center font-headline text-3xl font-black tracking-normal text-white">
                       Louis Zhang
                     </h1>
@@ -409,7 +423,7 @@ export default function MissionBriefing() {
                     <kbd className="rounded border border-slate-900/20 bg-slate-950/15 px-2 py-1 text-[9px]">ENTER</kbd>
                   </motion.button>
                   <p className="mt-2 text-center font-label text-[9px] font-bold uppercase tracking-[0.18em] text-cyan-100/28">
-                    ESC skips intro
+                    Auto-advances when each scan finishes · ESC skips intro
                   </p>
                 </div>
 

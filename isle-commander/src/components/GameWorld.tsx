@@ -16,11 +16,18 @@ interface GameWorldProps {
   onIslandClick: (mission: Mission) => void;
 }
 
+interface RouteCurve {
+  d: string;
+  color: string;
+}
+
 const WORLD_SIZE = 5000;
 const HALF = WORLD_SIZE / 2;
 const BG_SIZE = 12000;
 const MID_SIZE = 10000;
 const FG_SIZE = 7000;
+const SAFE_ROUTE_RADIUS = 145;
+const ISLAND_VISIBLE_BARRIER_RADIUS = 112;
 
 function seededRandom(seed: number) {
   let s = seed;
@@ -77,7 +84,7 @@ const GameWorld = React.memo(function GameWorld({
     }));
   }, []);
 
-  const pathLines = useMemo(() => {
+  const routeCurves = useMemo<RouteCurve[]>(() => {
     const lines: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
     const sectorGroups: Record<string, Mission[]> = {};
     missions.forEach((m) => {
@@ -103,7 +110,23 @@ const GameWorld = React.memo(function GameWorld({
       }
     });
 
-    return lines;
+    return lines.map((line, i) => {
+      const dx = line.x2 - line.x1;
+      const dy = line.y2 - line.y1;
+      const len = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      const ux = dx / len;
+      const uy = dy / len;
+      const startRadius = line.x1 === 0 && line.y1 === 0 ? 0 : SAFE_ROUTE_RADIUS;
+      const endRadius = SAFE_ROUTE_RADIUS;
+      const sx = line.x1 + ux * startRadius + HALF;
+      const sy = line.y1 + uy * startRadius + HALF;
+      const ex = line.x2 - ux * endRadius + HALF;
+      const ey = line.y2 - uy * endRadius + HALF;
+      const bend = (i % 2 === 0 ? 1 : -1) * 82;
+      const cx = (sx + ex) / 2 + -uy * bend;
+      const cy = (sy + ey) / 2 + ux * bend;
+      return { color: line.color, d: `M ${sx} ${sy} Q ${cx} ${cy} ${ex} ${ey}` };
+    });
   }, []);
 
   const edgeFog = useMemo(() => {
@@ -249,13 +272,15 @@ const GameWorld = React.memo(function GameWorld({
         <div className="absolute inset-0 opacity-[0.045]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 2px)", backgroundSize: "58px 58px" }} />
 
         <svg className="absolute inset-0 h-full w-full pointer-events-none" viewBox={`0 0 ${WORLD_SIZE} ${WORLD_SIZE}`}>
-          {pathLines.map((line, i) => (
-            <g key={i}>
-              <line x1={line.x1 + HALF} y1={line.y1 + HALF + 5} x2={line.x2 + HALF} y2={line.y2 + HALF + 5} stroke="rgba(3,20,30,0.18)" strokeWidth="20" strokeLinecap="round" />
-              <line x1={line.x1 + HALF} y1={line.y1 + HALF} x2={line.x2 + HALF} y2={line.y2 + HALF} stroke="rgba(255,255,255,0.55)" strokeWidth="12" strokeLinecap="round" />
-              <line x1={line.x1 + HALF} y1={line.y1 + HALF} x2={line.x2 + HALF} y2={line.y2 + HALF} stroke={line.color} strokeWidth="5" strokeLinecap="round" strokeDasharray="14 18" opacity="0.62" />
-            </g>
-          ))}
+          {routeCurves.map((route, i) => {
+            return (
+              <g key={i}>
+                <path d={route.d} stroke="rgba(3,20,30,0.16)" strokeWidth="20" strokeLinecap="round" fill="none" />
+                <path d={route.d} stroke="rgba(255,255,255,0.48)" strokeWidth="10" strokeLinecap="round" fill="none" />
+                <path d={route.d} stroke={route.color} strokeWidth="4" strokeLinecap="round" strokeDasharray="18 22" opacity="0.68" fill="none" />
+              </g>
+            );
+          })}
         </svg>
 
         {decor.islets.map((t, i) => (
@@ -273,7 +298,7 @@ const GameWorld = React.memo(function GameWorld({
           </div>
         ))}
 
-        {decor.buoys.map((b, i) => (
+        {decor.buoys.slice(0, 18).map((b, i) => (
           <div key={`buoy-${i}`} className="absolute pointer-events-none" style={{ left: b.x + HALF, top: b.y + HALF, transform: "translate(-50%, -50%)", animation: `float ${2.5 + (i % 4) * 0.4}s ease-in-out infinite`, animationDelay: `${b.delay}s` }}>
             <div
               className="rounded-full shadow-lg"
@@ -329,7 +354,7 @@ const GameWorld = React.memo(function GameWorld({
           return (
             <div
               key={`current-${mission.id}`}
-              className="absolute pointer-events-none rounded-full game-current-ring"
+              className={`absolute pointer-events-none rounded-full ${nearbyIsland?.id === mission.id ? "game-current-ring" : "game-current-ring game-current-ring--calm"}`}
               style={{
                 left: mission.position.x + HALF - radius,
                 top: mission.position.y + HALF - radius,
@@ -343,6 +368,25 @@ const GameWorld = React.memo(function GameWorld({
             </div>
           );
         })}
+
+        {missions.filter((mission) => mission.status === "active").map((mission) => (
+          <div
+            key={`barrier-${mission.id}`}
+            className="island-barrier absolute pointer-events-none rounded-full"
+            style={{
+              left: mission.position.x + HALF - ISLAND_VISIBLE_BARRIER_RADIUS,
+              top: mission.position.y + HALF - ISLAND_VISIBLE_BARRIER_RADIUS,
+              width: ISLAND_VISIBLE_BARRIER_RADIUS * 2,
+              height: ISLAND_VISIBLE_BARRIER_RADIUS * 2,
+              borderColor: `${mission.color}b8`,
+              ["--barrier-color" as string]: mission.color,
+            }}
+          >
+            <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-slate-950/65 px-2 py-0.5 font-label text-[7px] font-black uppercase tracking-[0.16em] text-cyan-50/72">
+              no-sail
+            </span>
+          </div>
+        ))}
 
         {fish.map((f, i) => (
           <div key={`fish-${i}`} className="absolute pointer-events-none" style={{ left: f.x + HALF, top: f.y + HALF, transform: `translate(-50%, -50%) scale(${f.scale})`, animation: `fishSwim ${f.speed}s linear infinite`, animationDelay: `${f.delay}s`, zIndex: 12 }}>

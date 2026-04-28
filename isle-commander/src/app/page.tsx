@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/refs */
 
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { useMatterEngine } from "@/hooks/useMatterEngine";
@@ -13,6 +14,7 @@ import MissionBriefing, { SprocketCornerButton } from "@/components/MissionBrief
 import PortShop from "@/components/PortShop";
 import AssemblyModal from "@/components/AssemblyModal";
 import GameChrome from "@/components/GameChrome";
+import GuideRobot from "@/components/GuideRobot";
 
 /* Seeded RNG for stable star positions */
 function seededRng(seed: number) {
@@ -33,22 +35,11 @@ const STARS = (() => {
 
 export default function Home() {
   const game = useMatterEngine();
+  const canvasRef = game.canvasRef;
 
   // Assembly modal state
   const [assemblyMission, setAssemblyMission] = useState<typeof game.inspectedIsland>(null);
   const [assemblyOpen, setAssemblyOpen] = useState(false);
-
-  // When a blueprint is opened, check if it has assembly parts
-  const handleOpenBlueprint = useCallback(() => {
-    game.openBlueprint();
-  }, [game.openBlueprint]);
-
-  const handleOpenAssembly = useCallback(() => {
-    if (game.inspectedIsland?.assemblyParts) {
-      setAssemblyMission(game.inspectedIsland);
-      setAssemblyOpen(true);
-    }
-  }, [game.inspectedIsland]);
 
   const handleCloseAssembly = useCallback(() => {
     setAssemblyOpen(false);
@@ -61,7 +52,7 @@ export default function Home() {
 
   // Sync canvas buffer size to viewport (avoids SSR/client hydration mismatch)
   useEffect(() => {
-    const canvas = game.canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
     const sync = () => {
       canvas.width = window.innerWidth;
@@ -70,7 +61,7 @@ export default function Home() {
     sync();
     window.addEventListener("resize", sync);
     return () => window.removeEventListener("resize", sync);
-  }, [game.canvasRef]);
+  }, [canvasRef]);
 
   // Night cycle
   const nightOpacity = Math.min(1, Math.max(0, game.timeOfDay));
@@ -166,6 +157,7 @@ export default function Home() {
         nearestGravityAngle={game.nearestGravityAngle}
         onIslandClick={game.navigateToIsland}
         onToggleMap={game.toggleMap}
+        onReturnHome={game.returnHome}
         score={game.score}
         collectedItems={game.collectedItems}
         isHullCritical={game.isHullCritical}
@@ -180,6 +172,13 @@ export default function Home() {
           onInspect={game.openBlueprint}
         />
       )}
+
+      <GuideRobot
+        nearbyIsland={game.nearbyIsland}
+        isDocked={game.isDocked}
+        mapOpen={game.mapOpen}
+        gameState={game.gameState}
+      />
 
       {/* ── BLUEPRINT MODAL ── */}
       <BlueprintModal

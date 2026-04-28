@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Mission } from "@/data/missions";
 
@@ -16,11 +17,36 @@ const GRID_STYLE = {
 };
 
 export default function BlueprintModal({ mission, isOpen, onClose }: BlueprintModalProps) {
+  const mediaItems = useMemo(() => {
+    if (!mission) return [];
+
+    const sources =
+      mission.images && mission.images.length > 0
+        ? mission.images
+        : mission.image
+          ? [mission.image]
+          : mission.logo
+            ? [mission.logo]
+            : [];
+
+    return sources.map((src, index) => ({
+      src,
+      label:
+        mission.imageLabels?.[index] ??
+        (index === 0 ? (mission.image ? "Field Photo" : "Identity Mark") : `Media ${index + 1}`),
+    }));
+  }, [mission]);
+
+  const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+
   if (!mission) return null;
 
   const parts = mission.assemblyParts?.slice(0, 6) ?? [];
   const hasParts = parts.length > 0;
   const moduleCount = Math.max(mission.skills.length, parts.length || 1);
+  const activeMedia = mediaItems.find((item) => item.src === selectedMedia) ?? mediaItems[0];
+  const mediaSrc = activeMedia?.src;
+  const mediaLabel = activeMedia?.label ?? "Schematic";
 
   return (
     <AnimatePresence>
@@ -106,7 +132,62 @@ export default function BlueprintModal({ mission, isOpen, onClose }: BlueprintMo
 
               <div className="relative grid max-h-[calc(92vh-142px)] gap-5 overflow-y-auto p-4 lg:grid-cols-[360px_1fr] lg:p-6">
                 <section className="grid gap-4 content-start">
-                  <div className="relative min-h-[310px] overflow-hidden rounded-lg border border-cyan-100/16 bg-cyan-100/[0.035] p-4">
+                  {mediaSrc && (
+                    <motion.div
+                      className="relative aspect-[16/10] overflow-hidden rounded-lg border border-cyan-100/18 bg-slate-950/72"
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.08 }}
+                    >
+                      <img
+                        src={mediaSrc}
+                        alt={`${mission.title} ${mediaLabel.toLowerCase()}`}
+                        className="h-full w-full object-contain"
+                      />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.08),rgba(2,6,23,0.62))]" />
+                      <div className="absolute inset-0 pointer-events-none game-scanline opacity-30" />
+                      <div className="absolute left-3 top-3 rounded-md border border-cyan-100/20 bg-slate-950/74 px-2 py-1 font-label text-[9px] font-black uppercase tracking-[0.18em] text-cyan-100/72">
+                        {mediaLabel}
+                      </div>
+                      <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.85)]" />
+                        <span className="truncate font-label text-[10px] font-black uppercase tracking-[0.16em] text-white/76">
+                          {mission.title}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {mediaItems.length > 1 && (
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {mediaItems.map((item) => {
+                        const isSelected = item.src === mediaSrc;
+                        return (
+                          <button
+                            key={item.src}
+                            type="button"
+                            onClick={() => setSelectedMedia(item.src)}
+                            className={`group overflow-hidden rounded-md border bg-slate-950/66 text-left transition-all ${
+                              isSelected
+                                ? "border-cyan-200 shadow-[0_0_18px_rgba(103,232,249,0.24)]"
+                                : "border-cyan-100/14 hover:border-cyan-100/36"
+                            }`}
+                            aria-pressed={isSelected}
+                          >
+                            <span className="relative block aspect-[16/10] bg-slate-950">
+                              <img src={item.src} alt={`${mission.title} ${item.label}`} className="h-full w-full object-cover opacity-86 transition-transform duration-300 group-hover:scale-[1.035]" />
+                              <span className="absolute inset-0 bg-gradient-to-t from-slate-950/76 via-transparent to-transparent" />
+                            </span>
+                            <span className="block truncate px-2 py-1.5 font-label text-[9px] font-black uppercase tracking-[0.12em] text-cyan-50/72">
+                              {item.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="relative min-h-[260px] overflow-hidden rounded-lg border border-cyan-100/16 bg-cyan-100/[0.035] p-4">
                     <div className="absolute inset-5 rounded-full border border-cyan-100/14 blueprint-orbit" />
                     <div className="absolute left-1/2 top-[43%] h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/18 bg-slate-950/62" />
                     <div className="absolute left-1/2 top-[43%] grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-md border border-cyan-100/26 bg-cyan-200/12 shadow-[0_0_28px_rgba(34,211,238,0.24)]">
@@ -139,7 +220,7 @@ export default function BlueprintModal({ mission, isOpen, onClose }: BlueprintMo
                     <DataTile label="Mission Code" value={mission.id} />
                     <DataTile label="Sector" value={mission.sector} />
                     <DataTile label="Systems" value={`${moduleCount} modules`} />
-                    <DataTile label="Status" value="VERIFIED" highlight />
+                    <DataTile label="Media" value={mediaSrc ? "ATTACHED" : "MISSING"} highlight={Boolean(mediaSrc)} />
                   </div>
                 </section>
 
@@ -189,6 +270,26 @@ export default function BlueprintModal({ mission, isOpen, onClose }: BlueprintMo
                             <span className="h-3 w-3 rounded-full" style={{ background: part.color }} />
                             <span className="truncate font-label text-[11px] font-black text-cyan-50/78">{part.label}</span>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {mission.resources && mission.resources.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 flex items-center gap-2 font-label text-[10px] font-black uppercase tracking-[0.2em] text-cyan-100/55">
+                        <span className="material-symbols-outlined icon-lock text-[17px]">folder_open</span>
+                        Mission Resources
+                      </h3>
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {mission.resources.map((resource) => (
+                          <ActionLink
+                            key={resource.href}
+                            href={resource.href}
+                            icon={resource.icon ?? "description"}
+                            label={resource.label}
+                            emptyLabel="Missing"
+                          />
                         ))}
                       </div>
                     </div>
