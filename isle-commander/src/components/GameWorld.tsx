@@ -85,30 +85,12 @@ const GameWorld = React.memo(function GameWorld({
       sectorGroups[m.sector].push(m);
     });
 
-    const dist2 = (a: { x: number; y: number }, b: { x: number; y: number }) =>
-      (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
-    const origin = { x: 0, y: 0 };
-
     Object.values(sectorGroups).forEach((group) => {
-      const internshipOrder = ["I-4", "I-2", "I-1", "I-3"];
-      const remaining = group[0]?.sector === "Internship Shores"
-        ? [...group].sort((a, b) => internshipOrder.indexOf(a.id) - internshipOrder.indexOf(b.id))
-        : [...group].sort((a, b) => dist2(a.position, origin) - dist2(b.position, origin));
-      const ordered: Mission[] = [remaining.shift()!];
-      while (remaining.length > 0 && group[0]?.sector !== "Internship Shores") {
-        const last = ordered[ordered.length - 1].position;
-        let bestIdx = 0;
-        let bestD = dist2(last, remaining[0].position);
-        for (let i = 1; i < remaining.length; i++) {
-          const d = dist2(last, remaining[i].position);
-          if (d < bestD) {
-            bestD = d;
-            bestIdx = i;
-          }
-        }
-        ordered.push(remaining.splice(bestIdx, 1)[0]);
-      }
-      if (group[0]?.sector === "Internship Shores") ordered.push(...remaining);
+      // Chronological order by chronoOrder; locked missions (no date) are excluded from the path.
+      const ordered = group
+        .filter((m) => m.chronoOrder != null)
+        .sort((a, b) => (a.chronoOrder ?? 0) - (b.chronoOrder ?? 0));
+      if (ordered.length === 0) return;
       lines.push({ x1: 0, y1: 0, x2: ordered[0].position.x, y2: ordered[0].position.y, color: ordered[0].sectorColor });
       for (let i = 0; i < ordered.length - 1; i++) {
         lines.push({

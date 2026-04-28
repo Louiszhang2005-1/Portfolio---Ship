@@ -201,9 +201,12 @@ export default function Island({ mission, isNearby, isVisited, index, onClick }:
           )}
 
           {isLocked && !isTesla && (
-            <div className="absolute -top-9 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap">
-              <div className="rounded-full border border-red-400/50 bg-slate-950/85 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-red-200 shadow-lg">
-                Locked · Summer 2026
+            <div className="absolute -top-20 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap">
+              <div
+                className="grid h-16 w-16 place-items-center rounded-full border-4 border-red-400/70 bg-slate-950/90 text-4xl font-black text-red-200 shadow-[0_0_24px_rgba(248,113,113,0.55)]"
+                style={{ animation: "hvPulse 1.8s ease-in-out infinite" }}
+              >
+                ?
               </div>
             </div>
           )}
@@ -288,6 +291,19 @@ export default function Island({ mission, isNearby, isVisited, index, onClick }:
             >
               {mission.sector}
             </span>
+            {!isLocked && mission.date && (
+              <span
+                className="mt-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-black tracking-wide shadow"
+                style={{
+                  color: isTesla ? "#1f1202" : "#1f2937",
+                  background: isTesla ? "#fff59d" : "rgba(255,249,230,0.97)",
+                  borderColor: isTesla ? "#ffee00" : `${mission.color}55`,
+                  boxShadow: isTesla ? "0 0 10px #ffee0066" : undefined,
+                }}
+              >
+                {mission.date}
+              </span>
+            )}
           </div>
 
           {isNearby && !isLocked && (

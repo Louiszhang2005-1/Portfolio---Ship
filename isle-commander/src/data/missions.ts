@@ -21,6 +21,10 @@ export interface Mission {
   status: "locked" | "active";
   landmark: string;
   position: { x: number; y: number };
+  /** Display date for the mission badge (null for locked / unknown). */
+  date: string | null;
+  /** Chronological sort key (YYYYMM); used to order in-sector paths. Null for locked. */
+  chronoOrder: number | null;
   skills: string[];
   details: string;
   emoji: string;
@@ -49,6 +53,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A waterfront city hall with municipal water-testing labs and bubbling sample beakers",
     position: { x: -560, y: -420 },
+    date: "May–Aug 2025",
+    chronoOrder: 202505,
     skills: ["Water Quality Testing", "Lab Analysis", "Environmental Monitoring", "Data Analysis", "Python"],
     details:
       "Scientific Intern at the City of Montreal's Water Department (May–Aug 2025). Performed hands-on water testing across municipal sources — collected and analyzed samples for chemical, physical, and microbiological parameters to validate compliance with Quebec drinking-water standards. Operated lab instrumentation, logged results into the city's monitoring pipelines, and supported the data analysis workflow that informs distribution-network decisions.",
@@ -68,6 +74,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A naval shipyard with a docked frigate, gantry cranes, and integration scaffolding",
     position: { x: -1050, y: -760 },
+    date: "Winter 2026",
+    chronoOrder: 202601,
     skills: ["Ship Systems Integration", "3D CAD Modeling", "Mechanical Design", "GD&T", "FEA", "CATIA"],
     details:
       "Mechanical Engineering Intern at Lockheed Martin on the Ship Integrations team (Winter 2026). Supported the mechanical integration of subsystems aboard naval platforms — 3D CAD modeling, structural layouts, fit-checks, and tolerance/GD&T documentation for shipboard hardware. Worked on FEA validation for mounting structures and contributed to the assembly drawings and interface documentation that govern how subsystems are physically integrated into the ship.",
@@ -89,6 +97,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A massive gigafactory with electric arcs and battery cell assembly lines",
     position: { x: -1500, y: -1180 },
+    date: "Summer–Fall 2026 · Incoming",
+    chronoOrder: 202607,
     skills: ["Manufacturing Engineering", "Battery Cell Engineering", "Process Optimization", "Automation", "Python", "Lean Six Sigma"],
     details:
       "Incoming Manufacturing Engineering Intern at Tesla on the Cell Engineering team (Summer–Fall 2026, Nevada Gigafactory). Will work on the manufacturing processes behind Tesla's battery cells — production-line optimization, process improvement, and automation systems supporting next-generation cell architectures and high-volume cell output.",
@@ -111,6 +121,8 @@ export const missions: Mission[] = [
     status: "locked",
     landmark: "A black monolith with a pulsing question mark beacon",
     position: { x: -1540, y: -430 },
+    date: null,
+    chronoOrder: null,
     skills: [],
     details: "Classified — mission briefing not yet available. Stay curious.",
     emoji: "❓",
@@ -132,6 +144,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A miniature moon-base with a moving lunar wagon",
     position: { x: 1300, y: -400 },
+    date: "Jan–May 2025",
+    chronoOrder: 202501,
     skills: ["CATIA V6", "Fusion 360", "GD&T", "MS Project", "Cold Welding", "Systems Integration", "FEA", "Arduino", "Raspberry Pi Pico"],
     details:
       "PM & Systems Integrator for the Canadian Space Agency Lunar Exploration Accelerator Program (LEAP) — OASIS Mission (Jan–May 2025, Polytechnique Montréal). Directed end-to-end design of a 3.1m telescopic lunar produce-transport tube (Ø540mm, 3080mm deployed length) fully compliant with CSA performance and safety standards. Managed 50+ part interfaces, achieved a 12% system mass reduction while sustaining a 2.5× structural safety factor. Ran thermal FEA over the 14-day lunar night cycle and validated zero mechanical interference across the full telescopic deployment sweep. Developed the rail-guided transport wagon's control logic on an Arduino microcontroller — ensuring precision positioning along the telescopic support tube. Designed and programmed a Raspberry Pi Pico–driven belt conveyor for seamless vegetable transfer from lunar greenhouse to habitat module. Led physical integration: AL-6061 machining, MLI fabrication, PCB prototyping, wiring harnesses, and cold-welding of tab-to-tube joints.",
@@ -160,6 +174,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A giant, translucent mechanical pump with moving pistons",
     position: { x: 400, y: -400 },
+    date: "Nov–Dec 2024",
+    chronoOrder: 202411,
     skills: ["3D CAD", "SolidWorks", "Mechanical Design", "GD&T", "Assembly Modeling"],
     details:
       "3D CAD modeling project at Polytechnique Montréal (Nov–Dec 2024). Fully modeled a high-performance axial piston hydraulic pump from the ground up. The assembly consists of a Cylinder Block (Bloc-cylindre) housing 9 individual Piston Assemblies — each comprising a Piston and a Slipper Pad (Patin) — retained by a Retaining Plate (Plaque de retenue) and centered via a Spherical Nut (Noix sphérique). Optimized component geometry and assembly parameters to enhance mechanical durability and functionality. Produced a full exploded-view drawing with bilingual French/English BOM following standard drafting conventions.",
@@ -187,6 +203,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A tiny forest with a robot planting low-poly trees",
     position: { x: 1300, y: -1200 },
+    date: "Feb 2025",
+    chronoOrder: 202502,
     skills: ["Arduino C++", "IR Sensors", "Color Sensor", "DC Motors", "Recycled Materials"],
     details:
       "🏆 Winner — Unexpected Expedition Award · 5th Place Overall at RoboHacks (Feb 2025). Built a fully autonomous seed-planting robot in 24 hours using recycled materials — cardboard chassis, plastic bottles, and a paper-engineered seed dispenser. Coded the full navigation and dispensing sequence in C++ on Arduino: two IR sensors fused with a color sensor for line-following, servo-actuated paper dispenser for timed seed placement. Wired all electronics on a breadboard from scratch under competition conditions.",
@@ -217,6 +235,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A holographic workshop with rotating CAD models and quiz stations",
     position: { x: 400, y: -1200 },
+    date: "Jan 2026",
+    chronoOrder: 202601,
     skills: ["SolidWorks", "Blender", "React", "Python", "AI API", "3D Modeling", "CAD Integration"],
     details:
       "Built at McHacks 13 (Jan 2026). As mechanical engineering students who have spent countless hours scrolling Glassdoor and LinkedIn preparing for technical interviews, we built MechPrep — an interactive interview prep platform tailored for mechanical and aerospace engineering students. Designed and modeled 3D components in SolidWorks and Blender, then integrated the CAD models into a React + Python web app to make them interactive and educational. Integrated an AI API to generate and evaluate interview questions. Key challenges: wiring the AI API into the project architecture and embedding interactive CAD models into the browser. Next steps: expand the question bank across more companies and offer a white-label tool to help companies generate their own technical interview questions.",
@@ -246,6 +266,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A medical station with a giant glowing NFC wristband",
     position: { x: -1300, y: 400 },
+    date: "Feb 2026",
+    chronoOrder: 202602,
     skills: ["SolidWorks", "Passive NFC", "IP68 Design", "PCB Prototyping", "Next.js", "Medical Design", "Systems Architecture"],
     details:
       "Built at UpStart 2026 (Feb 2026) as part of a multidisciplinary team from Polytechnique Montréal. In Montreal, analog paper triage tags contribute to a 30% triage error rate, $1.7B in annual malpractice losses, and 10.5-hour average ER wait times. ResQ-Link replaces paper tags with a zero-power passive NFC bracelet: inductive copper coil (no battery required), passive NFC chip, IP68 medical-grade silicone band with translucent overmolded seal. Bundled with the SmartTriage companion dashboard — a full Command Center featuring real-time bracelet location maps, tag management (Morgue/Immediate/Delayed/Minor), registered staff tracking, and an offline-mesh data sync protocol so data reaches the hospital even when cellular fails. Business model: hardware 'Blade' at $1.50/unit (80% gross margin at scale) + software 'Razor' SaaS at $10k–$50k/facility/year. Targeting $750k seed round for MUHC 5,000-unit pilot, Health Canada Class I/II certification, and Quebec 'Buy Local' procurement priority.",
@@ -273,6 +295,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A futuristic care facility with a spinning radar dish and AI core",
     position: { x: -400, y: 400 },
+    date: "Jan 2026",
+    chronoOrder: 202601,
     skills: ["Python", "C++", "mmWave Radar", "ESP32 / FreeRTOS", "ROS 2", "MongoDB", "Gemini AI", "ElevenLabs", "OpenWRT"],
     details:
       "🏆 Winner at ConUHacks X — Best Use of ElevenLabs (Jan 2026). Co-founded an on-premises AI nurse assistant for Quebec long-term care facilities (CHSLDs). Falls among seniors (65+) have risen 47% between 2008–2019 — Nursie closes the gap between unwitnessed falls and delayed staff response. What it does: (1) detects falls using mmWave radar (IWR6843) fused with a floor vibration mat; (2) tracks room context via magnetic door sensor + PIR presence/occupancy node on ESP32/FreeRTOS; (3) monitors vital signs via smartwatch integration; (4) sends immediate alerts — phone call + dashboard push — to staff on detection; (5) builds a resident profile in MongoDB over time to flag unusual behavior (e.g. leaving the apartment at night); (6) provides a voice interface for residents via ElevenLabs for questions, appointment reminders, and medication prompts. Design principles: fast reliable detection over fancy features; 3× sensor redundancy to reduce false positives (radar + vibration mat + wearable fused for confidence scoring); privacy by architecture — all data stays on the facility's local OpenWRT LAN, no cameras, no cloud.",
@@ -296,6 +320,8 @@ export const missions: Mission[] = [
     status: "locked",
     landmark: "A glowing milestone pillar with orbiting rings",
     position: { x: -1300, y: 1200 },
+    date: null,
+    chronoOrder: null,
     skills: [],
     details: "Reserved milestone checkpoint — briefing not yet available.",
     emoji: "🏆",
@@ -317,6 +343,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A glowing AI clinic with floating chat bubbles and health charts",
     position: { x: 950, y: 1200 },
+    date: "Mar 2025",
+    chronoOrder: 202503,
     skills: ["Next.js", "Node.js", "Express", "Python", "FastAPI", "Fine-tuning", "TinyLlama", "AI"],
     details:
       "Built at UdemHacks (Mar 2025). LazyCare is an AI health assistant that provides personalized health recommendations via text-based interactions. Backend stack: Next.js frontend, Node.js/Express middleware, and a Python FastAPI service running a fine-tuned TinyLlama model for domain-specific health analysis. Fine-tuning allows the model to give more accurate, context-aware answers than a vanilla LLM. Features: personalized profile management, AI chat interface, and full conversation history so the assistant learns your context over time.",
@@ -337,6 +365,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A glowing interview booth with a floating AI avatar and speech waves",
     position: { x: 300, y: 400 },
+    date: "Jan 2024",
+    chronoOrder: 202401,
     skills: ["Python", "NLP", "Voice AI", "API Integration", "Natural Language Processing"],
     details:
       "Built at Brebeuf Hacks (Jan 2024) in a team of 3. A voice-based virtual interviewing assistant designed to help computer science students prepare for technical interviews. The assistant presents personalized interview questions verbally, listens to the interviewee's response, and evaluates the answer using natural language processing algorithms. Developed with Python and integrated an AI/NLP API to power the intelligent question-and-answer pipeline. Features a user-friendly voice interface so students can practice in a realistic spoken-word format rather than typing.",
@@ -357,6 +387,8 @@ export const missions: Mission[] = [
     status: "active",
     landmark: "A data-funnel temple with AI circuits",
     position: { x: 1650, y: 1200 },
+    date: "Mar–Apr 2026",
+    chronoOrder: 202603,
     skills: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Gemini AI", "Resend", "Apollo.io", "Google Sheets API"],
     details:
       "Fully integrated CRM outreach tool built for a Montreal urban agriculture cooperative (La Centrale Agricole), developed as part of Accenture's AOTC 2026 program. Manages contact lists across 3 audience segments (corporate, schools, institutions & media). Uses Google Gemini AI to generate personalized cold emails tailored to each contact's name, title, and organization — then sends them directly through the app. Tracks every contact through the full sales pipeline, syncs all data to Google Sheets in real time, and centralizes booking requests with auto-calculated revenue estimates. Team can accept, refuse, or cancel reservations — triggering a professional email to the client instantly. Total running cost: ~$0/month on free tiers.",
