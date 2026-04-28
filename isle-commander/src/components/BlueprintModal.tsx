@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Mission } from "@/data/missions";
 
 interface BlueprintModalProps {
@@ -9,277 +9,210 @@ interface BlueprintModalProps {
   onClose: () => void;
 }
 
-/* Blueprint-mode color palette */
-const BP = {
-  bg: "#050f1e",
-  panel: "#061525",
-  border: "rgba(0, 200, 255, 0.25)",
-  borderBright: "rgba(0, 200, 255, 0.6)",
-  text: "#ffffff",
-  textDim: "rgba(180, 225, 255, 0.65)",
-  accent: "#00d4ff",
-  accentDim: "rgba(0, 212, 255, 0.3)",
-  grid: "rgba(255, 255, 255, 0.045)",
-  gridBright: "rgba(255, 255, 255, 0.07)",
-};
-
 const GRID_STYLE = {
-  backgroundImage: `linear-gradient(${BP.grid} 1px, transparent 1px), linear-gradient(90deg, ${BP.grid} 1px, transparent 1px)`,
-  backgroundSize: "32px 32px",
-};
-
-const GRID_BRIGHT_STYLE = {
-  backgroundImage: `linear-gradient(${BP.gridBright} 1px, transparent 1px), linear-gradient(90deg, ${BP.gridBright} 1px, transparent 1px)`,
+  backgroundImage:
+    "linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)",
   backgroundSize: "32px 32px",
 };
 
 export default function BlueprintModal({ mission, isOpen, onClose }: BlueprintModalProps) {
   if (!mission) return null;
 
+  const parts = mission.assemblyParts?.slice(0, 6) ?? [];
+  const hasParts = parts.length > 0;
+  const moduleCount = Math.max(mission.skills.length, parts.length || 1);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* ── Blueprint Backdrop — zooms out slightly as modal zooms in ── */}
           <motion.div
             key="blueprint-backdrop"
-            initial={{ opacity: 0, scale: 1.08 }}
+            initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.04 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 z-[100]"
-            style={{
-              background: `linear-gradient(135deg, rgba(2, 8, 22, 0.97) 0%, rgba(4, 14, 32, 0.97) 100%)`,
-              backdropFilter: "blur(12px)",
-              ...GRID_STYLE,
-            }}
+            exit={{ opacity: 0, scale: 1.03 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className="fixed inset-0 z-[100] overflow-hidden bg-[radial-gradient(circle_at_24%_18%,rgba(34,211,238,0.2),transparent_32%),radial-gradient(circle_at_82%_24%,rgba(250,204,21,0.12),transparent_25%),linear-gradient(135deg,rgba(2,8,22,0.97),rgba(4,14,32,0.97))] backdrop-blur-[14px]"
+            style={GRID_STYLE}
             onClick={onClose}
-          />
+          >
+            <div className="absolute inset-0 game-scanline opacity-35" />
+            <div className="absolute left-[7%] top-[18%] h-52 w-52 rounded-full border border-cyan-100/10 blueprint-orbit" />
+            <div className="absolute bottom-[10%] right-[9%] h-64 w-64 rounded-full border border-cyan-100/10 blueprint-orbit blueprint-orbit--slow" />
+          </motion.div>
 
-          {/* Animated scan line across the backdrop */}
           <motion.div
             key="blueprint-scanline"
-            className="fixed left-0 right-0 z-[101] pointer-events-none h-px"
-            style={{ background: `linear-gradient(90deg, transparent, ${BP.accent}, transparent)`, opacity: 0.4 }}
+            className="pointer-events-none fixed left-0 right-0 z-[101] h-px bg-gradient-to-r from-transparent via-cyan-200 to-transparent opacity-50"
             initial={{ top: 0 }}
             animate={{ top: "100vh" }}
-            transition={{ duration: 2.5, ease: "linear", repeat: Infinity }}
+            transition={{ duration: 2.3, ease: "linear", repeat: Infinity }}
           />
 
-          {/* ── Blueprint Modal — camera zooms in from far away ── */}
           <motion.div
             key="blueprint-modal"
-            initial={{ opacity: 0, scale: 0.12, filter: "blur(14px)" }}
-            animate={{ opacity: 1, scale: 1,    filter: "blur(0px)"  }}
-            exit={{   opacity: 0, scale: 0.8,   filter: "blur(6px)"  }}
-            transition={{ type: "spring", stiffness: 240, damping: 22 }}
-            className="fixed inset-0 z-[102] flex items-center justify-center p-4"
+            initial={{ opacity: 0, scale: 0.72, y: 34, filter: "blur(10px)" }}
+            animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.88, y: 20, filter: "blur(5px)" }}
+            transition={{ type: "spring", stiffness: 260, damping: 24 }}
+            className="fixed inset-0 z-[102] flex items-center justify-center p-3 sm:p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
-              style={{
-                background: BP.panel,
-                border: `1px solid ${BP.border}`,
-                boxShadow: `0 0 40px rgba(0, 212, 255, 0.15), 0 0 80px rgba(0, 100, 180, 0.08)`,
-                ...GRID_STYLE,
-              }}
-            >
-              {/* ── Header ── */}
-              <div
-                className="relative px-6 py-6 overflow-hidden rounded-t-2xl"
-                style={{
-                  background: BP.bg,
-                  borderBottom: `1px solid ${BP.border}`,
-                  ...GRID_BRIGHT_STYLE,
-                }}
-              >
-                {/* Corner brackets (CAD style) */}
-                {[
-                  "top-0 left-0 border-t-2 border-l-2",
-                  "top-0 right-0 border-t-2 border-r-2",
-                  "bottom-0 left-0 border-b-2 border-l-2",
-                  "bottom-0 right-0 border-b-2 border-r-2",
-                ].map((cls, i) => (
-                  <div key={i} className={`absolute w-6 h-6 ${cls} pointer-events-none`} style={{ borderColor: BP.accentDim }} />
-                ))}
+            <div className="launch-panel relative max-h-[92vh] w-full max-w-[1040px] overflow-hidden rounded-lg border border-cyan-100/24 bg-slate-950/93 text-white shadow-[0_0_90px_rgba(34,211,238,0.2)]">
+              <div className="pointer-events-none absolute inset-0 opacity-60" style={GRID_STYLE} />
+              <div className="pointer-events-none absolute inset-0 game-scanline opacity-35" />
 
-                {/* Schematic label */}
-                <div className="absolute top-2 left-1/2 -translate-x-1/2">
-                  <span className="font-label text-[8px] uppercase tracking-[0.35em] font-bold" style={{ color: BP.accentDim }}>
-                    Technical Schematic · Classified
-                  </span>
+              <header className="relative border-b border-cyan-100/18 bg-cyan-300/[0.045] p-4 sm:p-6">
+                <div className="absolute right-16 top-3 hidden rotate-12 rounded-sm border-2 border-amber-300 px-3 py-1 font-label text-[10px] font-black uppercase tracking-[0.18em] text-amber-200 sm:block">
+                  Verified
                 </div>
-
-                {/* Close button */}
                 <button
                   onClick={onClose}
-                  className="absolute top-3 right-4 w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer"
-                  style={{ background: `${BP.accentDim}`, border: `1px solid ${BP.border}`, color: BP.accent }}
+                  className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-md border border-cyan-100/18 bg-cyan-300/10 text-cyan-100 transition-colors hover:bg-cyan-300/18"
+                  aria-label="Close mission briefing"
                 >
-                  ✕
+                  <span className="material-symbols-outlined icon-lock text-[22px]">close</span>
                 </button>
 
-                {/* Mission stamp */}
-                <motion.div
-                  className="absolute top-3 right-14 rotate-12"
-                  initial={{ scale: 0, rotate: -30 }}
-                  animate={{ scale: 1, rotate: 12 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.3 }}
-                >
-                  <div className="px-2.5 py-0.5 rounded text-[9px] font-label font-bold uppercase tracking-widest"
-                    style={{ border: `2px solid #fbbf24`, color: "#fbbf24" }}>
-                    ✓ Verified
-                  </div>
-                </motion.div>
-
-                <div className="relative flex items-center gap-5 mt-4">
-                  {/* Blueprint-tinted mission icon */}
+                <div className="flex gap-4 pr-12">
                   <motion.div
-                    className="relative w-20 h-20 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: `linear-gradient(135deg, ${BP.accentDim}, rgba(0, 60, 100, 0.6))`,
-                      border: `1px solid ${BP.border}`,
-                      boxShadow: `0 0 20px rgba(0, 212, 255, 0.2)`,
-                    }}
-                    animate={{ rotate: [0, 3, 0, -3, 0] }}
-                    transition={{ duration: 5, repeat: Infinity }}
+                    className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg border border-cyan-100/22 bg-cyan-200/[0.075]"
+                    animate={{ y: [-2, 2, -2], rotate: [-1.5, 1.5, -1.5] }}
+                    transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
                   >
+                    <div className="absolute inset-0 blueprint-crosshair opacity-60" />
                     {mission.logo ? (
-                      <img src={mission.logo} alt={`${mission.title} logo`} className="max-h-14 max-w-16 rounded bg-white/95 object-contain p-1" />
+                      <img src={mission.logo} alt={`${mission.title} logo`} className="relative max-h-14 max-w-16 rounded bg-white/95 object-contain p-1" />
                     ) : (
-                      <span className="text-5xl" style={{ filter: "sepia(100%) hue-rotate(165deg) saturate(400%) brightness(1.3)" }}>
-                        {mission.emoji}
-                      </span>
+                      <span className="material-symbols-outlined icon-lock relative text-[46px] text-cyan-100">precision_manufacturing</span>
                     )}
-                    {/* Cross-hair overlay */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className="absolute top-1/2 left-0 right-0 h-px" style={{ background: `${BP.accent}30` }} />
-                      <div className="absolute left-1/2 top-0 bottom-0 w-px" style={{ background: `${BP.accent}30` }} />
-                    </div>
                   </motion.div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-label font-bold text-xs px-2 py-0.5 rounded" style={{ background: `${BP.accentDim}`, color: BP.accent, border: `1px solid ${BP.border}` }}>
+                  <div className="min-w-0">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <span className="rounded-md border border-cyan-100/24 bg-cyan-300/12 px-2 py-1 font-label text-xs font-black text-cyan-100">
                         {mission.id}
                       </span>
-                      <span className="font-label text-[10px] uppercase tracking-widest" style={{ color: BP.textDim }}>
+                      <span className="font-label text-[10px] font-black uppercase tracking-[0.22em] text-cyan-100/55">
                         {mission.sector}
                       </span>
                     </div>
-                    <h2 className="text-2xl font-headline font-black leading-tight" style={{ color: BP.text }}>
+                    <h2 className="font-headline text-2xl font-black leading-tight text-white sm:text-4xl">
                       {mission.title}
                     </h2>
-                    <p className="text-sm font-body mt-0.5" style={{ color: BP.textDim }}>{mission.subtitle}</p>
+                    <p className="mt-1 max-w-2xl text-sm font-bold text-cyan-100/55 sm:text-base">{mission.subtitle}</p>
                   </div>
                 </div>
-              </div>
+              </header>
 
-              {/* ── Body ── */}
-              <div className="px-6 py-5 space-y-5">
-                {/* Tech Stack */}
-                <div>
-                  <h3 className="flex items-center gap-2 text-[10px] font-label font-bold uppercase tracking-widest mb-3" style={{ color: BP.textDim }}>
-                    <span className="text-sm">🔧</span> Tech Stack
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {mission.skills.map((skill, i) => (
-                      <motion.span
-                        key={skill}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.1 + i * 0.05 }}
-                        className="text-xs font-label font-bold px-3 py-1.5 rounded-full"
-                        style={{
-                          background: `rgba(0, 212, 255, 0.08)`,
-                          border: `1px solid rgba(0, 212, 255, 0.3)`,
-                          color: BP.accent,
-                        }}
-                      >
-                        {skill}
-                      </motion.span>
-                    ))}
+              <div className="relative grid max-h-[calc(92vh-142px)] gap-5 overflow-y-auto p-4 lg:grid-cols-[360px_1fr] lg:p-6">
+                <section className="grid gap-4 content-start">
+                  <div className="relative min-h-[310px] overflow-hidden rounded-lg border border-cyan-100/16 bg-cyan-100/[0.035] p-4">
+                    <div className="absolute inset-5 rounded-full border border-cyan-100/14 blueprint-orbit" />
+                    <div className="absolute left-1/2 top-[43%] h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/18 bg-slate-950/62" />
+                    <div className="absolute left-1/2 top-[43%] grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-md border border-cyan-100/26 bg-cyan-200/12 shadow-[0_0_28px_rgba(34,211,238,0.24)]">
+                      <span className="material-symbols-outlined icon-lock text-[42px] text-cyan-100">deployed_code</span>
+                    </div>
+                    {hasParts ? (
+                      parts.map((part, index) => {
+                        const x = 50 + Math.max(-38, Math.min(38, part.targetX / 1.8));
+                        const y = 43 + Math.max(-30, Math.min(30, part.targetY / 1.8));
+                        return (
+                          <motion.div
+                            key={part.id}
+                            className="absolute h-3 w-3 rounded-full border border-white/50 shadow-[0_0_14px_rgba(125,252,255,0.8)]"
+                            style={{ left: `${x}%`, top: `${y}%`, background: part.color }}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.12 + index * 0.08, type: "spring", stiffness: 320, damping: 18 }}
+                            title={part.label}
+                          />
+                        );
+                      })
+                    ) : (
+                      <div className="absolute inset-x-6 bottom-6 text-center font-label text-[10px] font-black uppercase tracking-[0.18em] text-cyan-100/38">
+                        Schematic signal locked to mission profile
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                {/* Divider */}
-                <div className="h-px" style={{ background: BP.border }} />
-
-                {/* Project Brief */}
-                <div>
-                  <h3 className="flex items-center gap-2 text-[10px] font-label font-bold uppercase tracking-widest mb-3" style={{ color: BP.textDim }}>
-                    <span className="text-sm">📋</span> Mission Brief
-                  </h3>
-                  <p className="text-sm leading-relaxed font-body" style={{ color: BP.text, opacity: 0.85 }}>
-                    {mission.details}
-                  </p>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px" style={{ background: BP.border }} />
-
-                {/* Technical Data Grid */}
-                <div className="rounded-xl p-4" style={{ background: BP.bg, border: `1px solid ${BP.border}` }}>
                   <div className="grid grid-cols-2 gap-3">
-                    <BPDataField label="Mission Code" value={mission.id} />
-                    <BPDataField label="Sector" value={mission.sector} />
-                    <BPDataField label="Systems" value={`${mission.skills.length} modules`} />
-                    <BPDataField label="Status" value="VERIFIED ✓" highlight />
+                    <DataTile label="Mission Code" value={mission.id} />
+                    <DataTile label="Sector" value={mission.sector} />
+                    <DataTile label="Systems" value={`${moduleCount} modules`} />
+                    <DataTile label="Status" value="VERIFIED" highlight />
                   </div>
-                </div>
+                </section>
 
-                {/* Action links */}
-                <div className="flex gap-3">
-                  {mission.github ? (
-                    <a href={mission.github} target="_blank" rel="noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-headline font-bold text-sm transition-all hover:brightness-110 active:scale-95"
-                      style={{ background: `linear-gradient(135deg, ${BP.accentDim}, rgba(0, 80, 120, 0.6))`, border: `1px solid ${BP.border}`, color: BP.text }}>
-                      💻 GitHub
-                    </a>
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-headline font-bold text-sm cursor-not-allowed"
-                      style={{ background: "rgba(255,255,255,0.03)", border: `1px solid rgba(255,255,255,0.08)`, color: "rgba(255,255,255,0.25)" }}>
-                      🔒 CLASSIFIED
+                <section className="grid gap-5 content-start">
+                  <div>
+                    <h3 className="mb-3 flex items-center gap-2 font-label text-[10px] font-black uppercase tracking-[0.2em] text-cyan-100/55">
+                      <span className="material-symbols-outlined icon-lock text-[17px]">manufacturing</span>
+                      Tech Stack
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {mission.skills.map((skill, i) => (
+                        <motion.span
+                          key={skill}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.08 + i * 0.035 }}
+                          className="rounded-full border border-cyan-100/24 bg-cyan-300/10 px-3 py-1.5 font-label text-xs font-black text-cyan-100 transition-colors hover:bg-cyan-300/18"
+                        >
+                          {skill}
+                        </motion.span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-cyan-100/16" />
+
+                  <div>
+                    <h3 className="mb-3 flex items-center gap-2 font-label text-[10px] font-black uppercase tracking-[0.2em] text-cyan-100/55">
+                      <span className="material-symbols-outlined icon-lock text-[17px]">article</span>
+                      Mission Brief
+                    </h3>
+                    <div className="relative overflow-hidden rounded-lg border border-white/10 bg-black/24 p-4">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/70 to-transparent blueprint-scan" />
+                      <p className="text-sm font-semibold leading-7 text-cyan-50/84 sm:text-base">{mission.details}</p>
+                    </div>
+                  </div>
+
+                  {hasParts && (
+                    <div>
+                      <h3 className="mb-3 flex items-center gap-2 font-label text-[10px] font-black uppercase tracking-[0.2em] text-cyan-100/55">
+                        <span className="material-symbols-outlined icon-lock text-[17px]">account_tree</span>
+                        Assembly Nodes
+                      </h3>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {parts.map((part) => (
+                          <div key={part.id} className="flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] p-2">
+                            <span className="h-3 w-3 rounded-full" style={{ background: part.color }} />
+                            <span className="truncate font-label text-[11px] font-black text-cyan-50/78">{part.label}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
-                  {mission.demo ? (
-                    <a href={mission.demo} target="_blank" rel="noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-headline font-bold text-sm transition-all hover:brightness-110 active:scale-95"
-                      style={{ border: `1px solid ${BP.borderBright}`, color: BP.accent }}>
-                      🚀 Live Demo
-                    </a>
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-headline font-bold text-sm cursor-not-allowed"
-                      style={{ background: "rgba(255,255,255,0.03)", border: `1px solid rgba(255,255,255,0.08)`, color: "rgba(255,255,255,0.25)" }}>
-                      🔜 Coming Soon
-                    </div>
-                  )}
-                </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <ActionLink href={mission.github} icon="code" label="GitHub" emptyLabel="Classified" />
+                    <ActionLink href={mission.demo} icon="rocket_launch" label="Live Demo" emptyLabel="Coming Soon" />
+                  </div>
 
-                {/* Return to Ship */}
-                <motion.button
-                  onClick={onClose}
-                  className="w-full py-4 rounded-xl font-headline font-black text-lg cursor-pointer"
-                  style={{
-                    background: `linear-gradient(135deg, rgba(0, 100, 140, 0.7), rgba(0, 60, 90, 0.7))`,
-                    border: `1px solid ${BP.borderBright}`,
-                    color: BP.text,
-                    boxShadow: `0 0 14px rgba(0, 212, 255, 0.15)`,
-                  }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(0, 212, 255, 0.3)" }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  ⛵ Return to Ship
-                </motion.button>
+                  <motion.button
+                    onClick={onClose}
+                    className="flex min-h-12 w-full items-center justify-center gap-3 rounded-md border border-cyan-100/28 bg-gradient-to-r from-cyan-500/65 to-emerald-500/45 px-4 py-3 font-headline text-sm font-black uppercase tracking-[0.16em] text-white shadow-[0_0_22px_rgba(34,211,238,0.18)]"
+                    whileHover={{ scale: 1.01, boxShadow: "0 0 34px rgba(34,211,238,0.28)" }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="material-symbols-outlined icon-lock text-[20px]">keyboard_return</span>
+                    Return to Ship
+                  </motion.button>
 
-                {/* ESC hint */}
-                <div className="text-center">
-                  <span className="text-[10px] font-label uppercase tracking-widest" style={{ color: BP.textDim }}>
-                    Press <kbd className="px-1.5 py-0.5 rounded font-bold mx-0.5" style={{ background: "rgba(0,212,255,0.1)", color: BP.accent, border: `1px solid ${BP.border}` }}>ESC</kbd> to close
-                  </span>
-                </div>
+                  <div className="text-center font-label text-[10px] font-black uppercase tracking-[0.18em] text-cyan-100/38">
+                    Press <kbd className="mx-1 rounded border border-cyan-100/18 bg-cyan-300/10 px-1.5 py-0.5 text-cyan-100/75">ESC</kbd> to close
+                  </div>
+                </section>
               </div>
             </div>
           </motion.div>
@@ -289,15 +222,38 @@ export default function BlueprintModal({ mission, isOpen, onClose }: BlueprintMo
   );
 }
 
-function BPDataField({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function DataTile({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div>
-      <div className="text-[9px] font-label uppercase tracking-wider mb-0.5" style={{ color: "rgba(160, 210, 240, 0.4)" }}>
-        {label}
-      </div>
-      <div className="text-xs font-bold font-label" style={{ color: highlight ? "#00ff88" : "#c8eeff" }}>
+    <div className="rounded-md border border-white/10 bg-slate-950/58 p-3">
+      <div className="font-label text-[9px] font-black uppercase tracking-[0.18em] text-cyan-100/38">{label}</div>
+      <div className="mt-1 truncate font-headline text-sm font-black" style={{ color: highlight ? "#86efac" : "#dff9ff" }}>
         {value}
       </div>
     </div>
+  );
+}
+
+function ActionLink({ href, icon, label, emptyLabel }: { href?: string; icon: string; label: string; emptyLabel: string }) {
+  if (!href) {
+    return (
+      <div className="flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 font-headline text-sm font-black text-white/28">
+        <span className="material-symbols-outlined icon-lock text-[18px]">lock</span>
+        {emptyLabel}
+      </div>
+    );
+  }
+
+  return (
+    <motion.a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="flex min-h-12 items-center justify-center gap-2 rounded-md border border-cyan-100/24 bg-cyan-300/10 px-4 py-3 font-headline text-sm font-black text-cyan-100"
+      whileHover={{ scale: 1.02, backgroundColor: "rgba(103,232,249,0.16)" }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <span className="material-symbols-outlined icon-lock text-[18px]">{icon}</span>
+      {label}
+    </motion.a>
   );
 }
