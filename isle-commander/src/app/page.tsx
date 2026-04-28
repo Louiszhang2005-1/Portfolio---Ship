@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { useMatterEngine } from "@/hooks/useMatterEngine";
 import GameWorld from "@/components/GameWorld";
 import ShipRenderer from "@/components/ShipRenderer";
@@ -59,6 +59,19 @@ export default function Home() {
     // Assembly passed — could add bonus score here
   }, []);
 
+  // Sync canvas buffer size to viewport (avoids SSR/client hydration mismatch)
+  useEffect(() => {
+    const canvas = game.canvasRef.current;
+    if (!canvas) return;
+    const sync = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    sync();
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, [game.canvasRef]);
+
   // Night cycle
   const nightOpacity = Math.min(1, Math.max(0, game.timeOfDay));
   const isNight = nightOpacity > 0.3;
@@ -105,8 +118,8 @@ export default function Home() {
       <canvas
         ref={game.canvasRef}
         className="fixed inset-0 pointer-events-none z-[4]"
-        width={typeof window !== "undefined" ? window.innerWidth : 1920}
-        height={typeof window !== "undefined" ? window.innerHeight : 1080}
+        width={1920}
+        height={1080}
         style={{ width: "100%", height: "100%" }}
       />
 
