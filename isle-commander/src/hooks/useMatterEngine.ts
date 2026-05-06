@@ -512,9 +512,9 @@ export function useMatterEngine(): MatterEngine {
             const proxFactor = Math.max(0, Math.min(1, (FIELD_ACTIVATE_DIST - distToShip) / (FIELD_ACTIVATE_DIST - FIELD_FULL_DIST)));
 
             if (m.fieldType === "typhoon") {
-              const particleCount = Math.floor(20 + proxFactor * 45);
+              const particleCount = Math.floor(12 + proxFactor * 20);
               const baseAlpha = proxFactor * (0.3 + proxFactor * 0.25);
-              ctx.lineWidth = 2 + proxFactor * 2;
+              ctx.lineWidth = 2 + proxFactor * 1.5;
               for (let i = 0; i < particleCount; i++) {
                 const seed = i * 137.508 + m.gravityMass;
                 const spiralAngle = (seed % (Math.PI * 2)) + time * (0.8 + (i % 3) * 0.3);
@@ -564,9 +564,9 @@ export function useMatterEngine(): MatterEngine {
                 ctx.fill();
               }
             } else {
-              const streamCount = Math.floor(12 + proxFactor * 18);
+              const streamCount = Math.floor(8 + proxFactor * 10);
               const baseAlpha = proxFactor * (0.25 + proxFactor * 0.2);
-              ctx.lineWidth = 1.5 + proxFactor * 1.5;
+              ctx.lineWidth = 1.5 + proxFactor * 1;
               for (let i = 0; i < streamCount; i++) {
                 const angle = (i / streamCount) * Math.PI * 2 + time * 0.35;
                 const startR = fieldR * (0.88 + Math.sin(i * 2.3 + time) * 0.08);
@@ -581,7 +581,7 @@ export function useMatterEngine(): MatterEngine {
                 ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${baseAlpha * (0.5 + Math.sin(i * 3.1 + time * 2) * 0.3)})`;
                 ctx.stroke();
               }
-              const dotCount = Math.floor(10 + proxFactor * 16);
+              const dotCount = Math.floor(6 + proxFactor * 10);
               for (let i = 0; i < dotCount; i++) {
                 const seed = i * 0.618 * Math.PI * 2;
                 const orbitSpeed = 0.4 + (i % 4) * 0.25;

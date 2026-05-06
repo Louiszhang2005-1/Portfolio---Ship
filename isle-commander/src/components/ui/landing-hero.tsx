@@ -79,7 +79,7 @@ export const LandingHero = () => {
 
         {/* Stars */}
         <div className="absolute inset-0">
-          {[...Array(60)].map((_, i) => (
+          {[...Array(30)].map((_, i) => (
             <div
               key={i}
               className="absolute rounded-full bg-white"

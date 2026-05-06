@@ -50,21 +50,21 @@ const GameWorld = React.memo(function GameWorld({
 }: GameWorldProps) {
   const decor = useMemo(() => {
     const rng = seededRandom(42);
-    const islets = Array.from({ length: 80 }, () => ({
+    const islets = Array.from({ length: 35 }, () => ({
       x: (rng() - 0.5) * 4200,
       y: (rng() - 0.5) * 4200,
       size: 18 + rng() * 20,
       hue: 82 + rng() * 45,
       rot: rng() * 70 - 35,
     }));
-    const buoys = Array.from({ length: 34 }, (_, i) => ({
+    const buoys = Array.from({ length: 14 }, (_, i) => ({
       x: (rng() - 0.5) * 3900,
       y: (rng() - 0.5) * 3900,
       size: 10 + rng() * 8,
       color: ["#ff4f58", "#ffd166", "#06d6a0", "#3fc7ff"][i % 4],
       delay: rng() * 2,
     }));
-    const rocks = Array.from({ length: 18 }, () => ({
+    const rocks = Array.from({ length: 10 }, () => ({
       x: (rng() - 0.5) * 4200,
       y: (rng() - 0.5) * 4200,
       size: 12 + rng() * 18,
@@ -75,7 +75,7 @@ const GameWorld = React.memo(function GameWorld({
 
   const clouds = useMemo(() => {
     const rng = seededRandom(77);
-    return Array.from({ length: 10 }, () => ({
+    return Array.from({ length: 6 }, () => ({
       x: (rng() - 0.5) * 4500,
       y: (rng() - 0.5) * 4500,
       size: 80 + rng() * 100,
@@ -132,7 +132,7 @@ const GameWorld = React.memo(function GameWorld({
   const edgeFog = useMemo(() => {
     const rng = seededRandom(111);
     const span = WORLD_BOUNDS - 100;
-    return Array.from({ length: 32 }, (_, i) => {
+    return Array.from({ length: 16 }, (_, i) => {
       const side = i % 4;
       if (side === 0) return { x: -span + rng() * span * 2, y: -WORLD_BOUNDS, size: 160 + rng() * 140 };
       if (side === 1) return { x: -span + rng() * span * 2, y: WORLD_BOUNDS, size: 160 + rng() * 140 };
@@ -143,7 +143,7 @@ const GameWorld = React.memo(function GameWorld({
 
   const fish = useMemo(() => {
     const rng = seededRandom(888);
-    return Array.from({ length: 12 }, (_, i) => ({
+    return Array.from({ length: 6 }, (_, i) => ({
       x: (rng() - 0.5) * 2600,
       y: (rng() - 0.5) * 2600,
       scale: 0.75 + rng() * 0.75,
@@ -157,7 +157,7 @@ const GameWorld = React.memo(function GameWorld({
   const midDebris = useMemo(() => {
     const rng = seededRandom(555);
     const driftAnims = ["mechDrift1", "mechDrift2", "mechDrift3"];
-    return Array.from({ length: 44 }, (_, i) => ({
+    return Array.from({ length: 20 }, (_, i) => ({
       x: (rng() - 0.5) * (MID_SIZE - 200),
       y: (rng() - 0.5) * (MID_SIZE - 200),
       size: 12 + rng() * 18,
@@ -171,7 +171,7 @@ const GameWorld = React.memo(function GameWorld({
   const fgParticles = useMemo(() => {
     const rng = seededRandom(666);
     const kinds = ["spark", "steam", "drop"] as const;
-    return Array.from({ length: 24 }, (_, i) => ({
+    return Array.from({ length: 12 }, (_, i) => ({
       x: (rng() - 0.5) * (FG_SIZE - 200),
       y: (rng() - 0.5) * (FG_SIZE - 200),
       size: 10 + rng() * 16,
@@ -252,7 +252,7 @@ const GameWorld = React.memo(function GameWorld({
               animation: `mechDrift${(i % 3) + 1} ${15 + (i % 5) * 3}s linear infinite`,
               animationDelay: `${item.delay}s`,
               background: item.kind === "spark" ? "#ffd166" : item.kind === "drop" ? "#b6f3ff" : "rgba(255,255,255,0.78)",
-              filter: "blur(0.5px)",
+
             }}
           />
         ))}
@@ -298,7 +298,7 @@ const GameWorld = React.memo(function GameWorld({
           </div>
         ))}
 
-        {decor.buoys.slice(0, 18).map((b, i) => (
+        {decor.buoys.map((b, i) => (
           <div key={`buoy-${i}`} className="absolute pointer-events-none" style={{ left: b.x + HALF, top: b.y + HALF, transform: "translate(-50%, -50%)", animation: `float ${2.5 + (i % 4) * 0.4}s ease-in-out infinite`, animationDelay: `${b.delay}s` }}>
             <div
               className="rounded-full shadow-lg"

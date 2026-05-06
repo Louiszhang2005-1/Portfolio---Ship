@@ -24,7 +24,7 @@ function seededRng(seed: number) {
 
 const STARS = (() => {
   const rng = seededRng(42);
-  return Array.from({ length: 80 }, (_, i) => ({
+  return Array.from({ length: 40 }, (_, i) => ({
     id: i,
     x: rng() * 100,
     y: rng() * 100,

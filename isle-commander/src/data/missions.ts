@@ -285,8 +285,7 @@ export const missions: Mission[] = [
     fieldType: "gravity",
     fieldRadius: 240,
     demo: "https://devpost.com/software/mechie",
-    image:
-      "https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/004/179/500/datas/original.png",
+    image: "/media/generated/mechprep.png",
     assemblyParts: [
       { id: "mech-cad", label: "CAD Model", shape: "rect", width: 60, height: 40, mass: 8, color: "#8B8682", targetX: 0, targetY: 0 },
       { id: "mech-gear", label: "Gear Component", shape: "circle", width: 30, height: 30, mass: 5, color: "#5c6bc0", targetX: -30, targetY: 15 },
@@ -324,8 +323,7 @@ export const missions: Mission[] = [
       { id: "resq-nfc", label: "Passive NFC Chip", shape: "rect", width: 14, height: 14, mass: 1, color: "#00d4ff", targetX: 0, targetY: 0 },
       { id: "resq-seal", label: "IP68 Overmold Seal", shape: "rect", width: 36, height: 28, mass: 2, color: "rgba(180,220,255,0.6)", targetX: 0, targetY: 0 },
     ],
-    image:
-      "https://opengraph.githubassets.com/isle-commander/Louiszhang2005-1/ResQ---Link",
+    image: "/media/generated/resq-link.png",
     resources: [
       { label: "Pitch Deck", href: "/media/resq-link/pitch-deck.pdf", icon: "slideshow" },
       { label: "Drawings/Dashboard", href: "/media/resq-link/drawings-dashboard.pdf", icon: "dashboard" },
@@ -413,7 +411,7 @@ export const missions: Mission[] = [
     fieldType: "gravity",
     fieldRadius: 220,
     github: "https://github.com/Karencheenn/LazyCare",
-    image: "https://opengraph.githubassets.com/isle-commander/Karencheenn/LazyCare",
+    image: "/media/generated/lazycare.png",
   },
 
   {
@@ -436,7 +434,7 @@ export const missions: Mission[] = [
     fieldType: "gravity",
     fieldRadius: 210,
     github: "https://github.com/Louiszhang2005-1/Virtual_interviewing_assistant",
-    image: "https://opengraph.githubassets.com/isle-commander/Louiszhang2005-1/Virtual_interviewing_assistant",
+    image: "/media/generated/interview-assistant.png",
   },
 
   {
@@ -460,8 +458,7 @@ export const missions: Mission[] = [
     fieldRadius: 230,
     github: "https://github.com/Louiszhang2005-1/Fully-Integrated-CRM-Tool",
     demo: "https://www.youtube.com/watch?v=TVuFauDyA00",
-    image:
-      "https://img.youtube.com/vi/TVuFauDyA00/maxresdefault.jpg",
+    image: "/media/generated/crm-outreach.png",
   },
 ];
 
