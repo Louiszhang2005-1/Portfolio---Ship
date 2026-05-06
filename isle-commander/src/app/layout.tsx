@@ -32,7 +32,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body overflow-hidden bg-black">
+      <body className="font-body bg-[var(--color-background)]">
         {children}
       </body>
     </html>

@@ -99,6 +99,24 @@
   --animate-sparkle: sparkle 2s ease-in-out infinite;
 }
 
+/* ── shadcn-compatible semantic tokens (mapped to nautical palette) ── */
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-on-background);
+  --card: var(--color-surface-container-low);
+  --card-foreground: var(--color-on-surface);
+  --muted: var(--color-surface-container);
+  --muted-foreground: var(--color-on-surface-variant);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-on-primary);
+  --secondary: var(--color-secondary-container);
+  --secondary-foreground: var(--color-on-secondary-container);
+  --border: var(--color-outline-variant);
+  --input: var(--color-surface-container);
+  --ring: var(--color-primary);
+  --radius: var(--radius-DEFAULT);
+}
+
 /* ── Base Reset ── */
 * {
   box-sizing: border-box;
@@ -108,12 +126,7 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: "Plus Jakarta Sans", sans-serif;
-  overflow: hidden;
-  width: 100vw;
-  height: 100vh;
   overscroll-behavior: none;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 /* ── Keyframes ── */
