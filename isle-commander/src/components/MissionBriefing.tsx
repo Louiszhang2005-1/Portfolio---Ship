@@ -68,9 +68,9 @@ const PHASE_LINES: Record<string, Line[]> = {
 };
 
 const INTERNSHIP_TIMELINE = [
-  { title: "City of Montreal", role: "Scientific Intern - Water Testing", when: "May-Aug 2025", logo: "/logo/city-of-montreal.gif" },
-  { title: "Lockheed Martin", role: "Mechanical Engineering Intern - Ship Integration", when: "Winter 2026", logo: "/logo/lockheed-martin.jpg" },
-  { title: "Tesla", role: "Manufacturing Engineering Intern - Cell Engineering", when: "Summer-Fall 2026", logo: "/logo/tesla.jpg" },
+  { title: "City of Montreal", role: "Scientific Intern - Water Testing", when: "May 2025-Aug 2025", logo: "/logo/city-of-montreal.gif" },
+  { title: "Lockheed Martin", role: "Mechanical Engineering Intern - Ship Integration", when: "Jan 2026– Apr 2026", logo: "/logo/lockheed-martin.jpg" },
+  { title: "Tesla", role: "Manufacturing Engineering Intern - Cell Engineering", when: "Jun 2026 – Jan 2027", logo: "/logo/tesla.jpg" },
 ];
 
 const PLAY_SIGNALS = [
@@ -354,12 +354,12 @@ export default function MissionBriefing() {
                 <div className="flex min-h-[420px] min-w-0 flex-col">
                   <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                    <p className="font-label text-[10px] font-black uppercase tracking-[0.32em] text-emerald-200/70">
-                      Isle Commander
-                    </p>
-                    <h2 className="mt-1 font-headline text-2xl font-black text-white md:text-4xl">
-                      A playable map of what I build.
-                    </h2>
+                      <p className="font-label text-[10px] font-black uppercase tracking-[0.32em] text-emerald-200/70">
+                        Isle Commander
+                      </p>
+                      <h2 className="mt-1 font-headline text-2xl font-black text-white md:text-4xl">
+                        A playable map of what I build.
+                      </h2>
                     </div>
                     <div className="min-w-[160px] rounded-md border border-white/10 bg-white/[0.04] p-3">
                       <div className="mb-2 flex items-center justify-between font-label text-[9px] font-black uppercase tracking-[0.18em] text-cyan-100/50">
@@ -379,36 +379,36 @@ export default function MissionBriefing() {
                   <div className="relative min-h-[256px] flex-1 overflow-hidden rounded-md border border-white/10 bg-black/28 p-4 font-mono text-[12px] leading-7 text-cyan-50/88">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/70 to-transparent blueprint-scan" />
                     <div className="relative h-full overflow-y-auto pr-1">
-                    {phase === "booting" && (
-                      <p className="text-cyan-100/70" style={{ animation: "holoFlicker 0.8s steps(1) infinite" }}>
-                        INITIALIZING PORTFOLIO INTERFACE...
-                      </p>
-                    )}
-                    {visibleLines.map((line, i) => (
-                      <p
-                        key={i}
-                        className="mb-1"
-                        style={{
-                          paddingLeft: line.indent ? 16 : 0,
-                          color: line.color ?? "#dff9ff",
-                        }}
-                      >
-                        {line.tag && (
-                          <span
-                            className="mr-2 inline-block rounded px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white"
-                            style={{ background: line.tagColor ?? "#075985" }}
-                          >
-                            {line.tag}
-                          </span>
-                        )}
-                        {line.partial}
-                        {i === visibleLines.length - 1 && !allDone && (
-                          <span className="text-cyan-200" style={{ animation: "holoFlicker 0.7s steps(1) infinite" }}>
-                            |
-                          </span>
-                        )}
-                      </p>
-                    ))}
+                      {phase === "booting" && (
+                        <p className="text-cyan-100/70" style={{ animation: "holoFlicker 0.8s steps(1) infinite" }}>
+                          INITIALIZING PORTFOLIO INTERFACE...
+                        </p>
+                      )}
+                      {visibleLines.map((line, i) => (
+                        <p
+                          key={i}
+                          className="mb-1"
+                          style={{
+                            paddingLeft: line.indent ? 16 : 0,
+                            color: line.color ?? "#dff9ff",
+                          }}
+                        >
+                          {line.tag && (
+                            <span
+                              className="mr-2 inline-block rounded px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white"
+                              style={{ background: line.tagColor ?? "#075985" }}
+                            >
+                              {line.tag}
+                            </span>
+                          )}
+                          {line.partial}
+                          {i === visibleLines.length - 1 && !allDone && (
+                            <span className="text-cyan-200" style={{ animation: "holoFlicker 0.7s steps(1) infinite" }}>
+                              |
+                            </span>
+                          )}
+                        </p>
+                      ))}
                     </div>
                   </div>
 
