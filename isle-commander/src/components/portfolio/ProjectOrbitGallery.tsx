@@ -27,7 +27,7 @@ export default function ProjectOrbitGallery({ projects }: { projects: PortfolioI
   }));
 
   return (
-    <section id="project-orbit" className="relative min-h-screen overflow-hidden bg-[#071015] text-white">
+    <section id="projects" className="relative min-h-screen overflow-hidden bg-[#071015] text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(34,211,238,0.18),transparent_32%),linear-gradient(180deg,#071015,#0c1410_65%,#071015)]" />
       <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:52px_52px]" />
 

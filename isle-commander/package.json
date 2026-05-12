@@ -8,6 +8,7 @@
     "dev:smoke": "powershell -ExecutionPolicy Bypass -File ./scripts/safe-dev.ps1 -Port 3010 -SmokeTestSeconds 12",
     "dev:turbo": "next dev --hostname 127.0.0.1 --port 3000",
     "build": "next build --webpack",
+    "preview": "next build --webpack && next start",
     "start": "next start",
     "lint": "eslint"
   },
