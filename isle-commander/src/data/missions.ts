@@ -88,7 +88,7 @@ export const missions: Mission[] = [
     chronoOrder: 202601,
     skills: ["SOLIDWORKS", "Engineering Drawings", "VBA Programming", "Windchill", "Confluence"],
     details:
-      "Engineering Intern at Lockheed Martin.\n\nSpecialized in 3D CAD modeling and structural design of ship components in SolidWorks — transforming engineering drawings into complete assemblies.\n\nBuilt VBA scripts to automate the peer-review process across several partner companies, improving overall turnaround time.",
+      "Mechanical Engineering Intern on the Ship Integration team — part of the Combat Surface Combatant program, Compartments team.\n\nSpecialized in 3D CAD modeling and structural design of ship compartment components in SolidWorks, transforming engineering drawings into complete assemblies.\n\nBuilt VBA scripts to automate the peer-review process across several partner companies, improving overall turnaround time.",
     emoji: "⚓",
     color: "#1a3a6b",
     logo: "/logo/Lockheed.webp",
@@ -111,7 +111,7 @@ export const missions: Mission[] = [
     chronoOrder: 202607,
     skills: [],
     details:
-      "Incoming Manufacturing Engineering Intern at Tesla's Gigafactory, Cell Engineering department (Summer 2026 & Fall 2026).\n\nFocused on the 4680 battery cell manufacturing processes, production line optimization, and automation systems for next-gen energy storage.",
+      "Incoming Manufacturing Engineering Intern at Tesla's Gigafactory, Cell Engineering department.\n\nFocused on the 4680 battery cell manufacturing processes, production line optimization, and automation systems for next-gen energy storage.",
     emoji: "⚡",
     color: "#e65100",
     logo: "/logo/tesla.jpg",

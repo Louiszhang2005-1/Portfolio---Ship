@@ -9,13 +9,13 @@
 ### ⚡ Tesla — Manufacturing Engineering Intern · Cell Engineering
 **Period:** Summer 2026 & Fall 2026  
 **Skills:** Manufacturing · Automation · Battery Cell Engineering · Python · Lean Six Sigma  
-Incoming Manufacturing Engineering Intern at Tesla's Gigafactory, Cell Engineering department (Summer 2026 & Fall 2026). Focused on the 4680 battery cell manufacturing processes, production line optimization, and automation systems for next-gen energy storage.
+Incoming Manufacturing Engineering Intern at Tesla's Gigafactory, Cell Engineering department. Focused on the 4680 battery cell manufacturing processes, production line optimization, and automation systems for next-gen energy storage.
 
 ---
 
-### ✈️ Lockheed Martin — Engineering Intern
+### ✈️ Lockheed Martin — Mechanical Engineering Intern · Ship Integration
 **Skills:** SOLIDWORKS · Engineering Drawings · VBA Programming · Windchill · Confluence  
-Engineering Intern at Lockheed Martin. Specialized in 3D CAD modeling and structural design of ship components in SolidWorks — transforming engineering drawings into complete assemblies. Built VBA scripts to automate the peer-review process across several partner companies, improving overall turnaround time.
+Mechanical Engineering Intern on the Ship Integration team — part of the Combat Surface Combatant program, Compartments team. Specialized in 3D CAD modeling and structural design of ship compartment components in SolidWorks, transforming engineering drawings into complete assemblies. Built VBA scripts to automate the peer-review process across several partner companies, improving overall turnaround time.
 
 ---
 
