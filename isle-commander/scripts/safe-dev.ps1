@@ -82,9 +82,14 @@ if ($freeMemory -lt $MinimumFreeMemoryMb) {
   throw "Only $freeMemory MB RAM is free. Safe dev needs at least $MinimumFreeMemoryMb MB free before starting."
 }
 
-$nextBin = Join-Path $ProjectRoot "node_modules\next\dist\bin\next"
-if (-not (Test-Path $nextBin)) {
-  throw "Next.js is not installed in this workspace. Run npm install from $ProjectRoot first."
+$workspaceRoot = Resolve-Path (Join-Path $ProjectRoot "..")
+$nextBinCandidates = @(
+  (Join-Path $ProjectRoot "node_modules\next\dist\bin\next"),
+  (Join-Path $workspaceRoot "node_modules\next\dist\bin\next")
+)
+$nextBin = $nextBinCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $nextBin) {
+  throw "Next.js is not installed. Run npm install from $workspaceRoot first."
 }
 
 Stop-NodeListenerOnPort -PortNumber $Port

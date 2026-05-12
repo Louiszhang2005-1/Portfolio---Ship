@@ -335,7 +335,7 @@ const TreasureMap = React.memo(function TreasureMap({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes routeDash { to { stroke-dashoffset: -50; } }
         @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
         @keyframes pulse { 0%,100% { opacity:0.4; transform: translate(-50%,-50%) scale(1); } 50% { opacity:0.7; transform: translate(-50%,-50%) scale(1.08); } }
