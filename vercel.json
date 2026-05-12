@@ -3,5 +3,6 @@
   "buildCommand": "npm --workspace isle-commander run build",
   "installCommand": "npm install",
   "devCommand": "npm --workspace isle-commander run dev",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "outputDirectory": "isle-commander/.next"
 }
