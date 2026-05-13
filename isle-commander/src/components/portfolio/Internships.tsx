@@ -29,11 +29,11 @@ export default function Internships() {
               className={`group flex flex-col gap-6 py-8 transition hover:bg-white/25 sm:flex-row sm:px-4 ${idx < active.length - 1 ? "border-b border-[var(--color-outline-variant)]" : ""}`}
             >
               <div className="flex-shrink-0">
-                <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-[var(--color-surface-container)] p-2 ring-1 ring-inset ring-[var(--color-outline-variant)]/60">
+                <div className="relative h-24 w-24 overflow-hidden rounded-2xl sm:h-28 sm:w-28">
                   {exp.image ? (
                     <img src={exp.image} alt={exp.title} className="h-full w-full object-contain" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[var(--color-surface-container)] text-xl font-bold text-[var(--color-on-surface-variant)]">
+                    <div className="flex h-full w-full items-center justify-center bg-[var(--color-surface-container)] text-2xl font-bold text-[var(--color-on-surface-variant)]">
                       {exp.emoji}
                     </div>
                   )}
