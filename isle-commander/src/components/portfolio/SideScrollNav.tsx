@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 const sections = [
   { id: "about", label: "Story" },
+  { id: "bio", label: "About" },
   { id: "portfolio-deck", label: "Deck" },
   { id: "experience", label: "Experience" },
   { id: "projects", label: "Projects" },
@@ -13,6 +14,7 @@ const sections = [
 
 const sectionTones: Record<string, "light" | "dark"> = {
   about: "dark",
+  bio: "light",
   "portfolio-deck": "light",
   experience: "light",
   projects: "dark",

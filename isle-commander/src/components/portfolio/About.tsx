@@ -10,7 +10,7 @@ const skills = [
 
 export default function About() {
   return (
-    <section id="about" className="pt-32 pb-20 px-6">
+    <section id="bio" className="pt-32 pb-20 px-6">
       <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24 items-center">
 
