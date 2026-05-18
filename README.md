@@ -2,7 +2,7 @@
 
 A modern, high-performance portfolio website built with Next.js, React, and TypeScript. Features smooth animations, physics-based interactions, and responsive design.
 
-**Live Demo:** https://portfolio-tan-eta-4nkbpc29pz.vercel.app
+**Live:** [https://portfolio-tan-eta-4nkbpc29pz.vercel.app](https://www.louiszhang.app/)
 
 ## 🚀 Tech Stack
 
